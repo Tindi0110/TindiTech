@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt - Tindi Tech</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', Helvetica, Arial, sans-serif;
+            background: #f0f2f5;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
+            margin: 0;
+            color: #1f2937;
+        }
+
+        .receipt-container {
+            width: 80mm;
+            /* Standard Thermal Receipt Width */
+            background: white;
+            padding: 15px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+            margin: 0 auto;
+            border-radius: 4px;
+            /* Slight radius for screen */
+            box-sizing: border-box;
+            /* Ensure padding doesn't affect width */
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 15px;
+            border-bottom: 2px solid #f3f4f6;
+            padding-bottom: 15px;
+        }
+
+        .brand-logo {
+            max-width: 60px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+        }
+
+        .brand h1 {
+            margin: 0;
+            font-size: 16px;
+            font-weight: 700;
+            color: #111827;
+        }
+
+        .brand p {
+            margin: 2px 0;
+            font-size: 10px;
+            color: #6b7280;
+        }
+
+        .receipt-meta {
+            margin-top: 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            font-size: 10px;
+            color: #374151;
+        }
+
+        .badge-copy {
+            align-self: center;
+            background: #e5e7eb;
+            color: #374151;
+            padding: 2px 8px;
+            border-radius: 999px;
+            font-size: 9px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            text-transform: uppercase;
+        }
+
+        .section-title {
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #9ca3af;
+            margin-bottom: 4px;
+        }
+
+        .bill-to {
+            margin: 15px 0;
+            font-size: 11px;
+            padding: 10px;
+            background: #f9fafb;
+            border-radius: 6px;
+        }
+
+        .bill-to p {
+            margin: 2px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 11px;
+            margin-bottom: 15px;
+        }
+
+        th {
+            text-align: left;
+            padding: 6px 0;
+            border-bottom: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-weight: 600;
+            font-size: 10px;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 8px 0;
+            vertical-align: top;
+            border-bottom: 1px dashed #f3f4f6;
+        }
+
+        tr:last-child td {
+            border-bottom: none;
+        }
+
+        .item-name {
+            font-weight: 500;
+        }
+
+        .item-meta {
+            font-size: 9px;
+            color: #6b7280;
+            margin-top: 2px;
+        }
+
+        .col-price {
+            text-align: right;
+            font-weight: 600;
+        }
+
+        .total-section {
+            border-top: 2px solid #f3f4f6;
+            margin-top: 10px;
+            padding-top: 10px;
+            font-size: 11px;
+        }
+
+        .row-flex {
+            display: flex;
+            justify-content: space-between;
+            margin: 3px 0;
+        }
+
+        .row-flex span:first-child {
+            color: #6b7280;
+        }
+
+        .total-final {
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 14px;
+        }
+
+        .total-final span {
+            color: #111827 !important;
+            font-weight: 700;
+        }
+
+        .footer {
+            text-align: center;
+            margin-top: 25px;
+            font-size: 10px;
+            color: #9ca3af;
+        }
+
+        .barcode-placeholder {
+            margin: 15px 0 5px;
+            height: 30px;
+            background: repeating-linear-gradient(90deg,
+                    #333,
+                    #333 2px,
+                    #fff 2px,
+                    #fff 4px);
+            width: 60%;
+            margin-left: auto;
+            margin-right: auto;
+            opacity: 0.5;
+        }
+
+        .btn-print {
+            padding: 10px 20px;
+            background: #111827;
+            color: white;
+            text-align: center;
+            text-decoration: none;
+            font-weight: 500;
+            cursor: pointer;
+            border: none;
+            font-size: 14px;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-print:hover {
+            background: #000;
+            transform: translateY(-1px);
+        }
+
+        .actions-bar {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 12px;
+            z-index: 100;
+            background: white;
+            padding: 10px 15px;
+            border-radius: 50px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+                display: block;
+                /* Default for print */
+                margin: 0;
+            }
+
+            .receipt-container {
+                box-shadow: none;
+                width: 100%;
+                /* Printer driver handles width (usually 80mm) */
+                padding: 0;
+                margin: 0;
+            }
+
+            .actions-bar,
+            .btn-print {
+                display: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="receipt-container" id="receipt">
+        <div style="display:flex; justify-content:center; align-items:center; height:300px;">
+            <div
+                style="width:20px; height:20px; border:2px solid #ccc; border-top-color:#333; border-radius:50%; animation:spin 1s infinite linear;">
+            </div>
+            <style>
+                @keyframes spin {
+                    100% {
+                        transform: rotate(360deg);
+                    }
+                }
+            </style>
+        </div>
+    </div>
+
+    <!-- Actions Bar (Fixed to bottom for better UX) -->
+    <div class="actions-bar">
+        <button onclick="window.print()" class="btn-print">
+            <span>🖨️</span> Print
+        </button>
+        <button onclick="downloadPdf()" class="btn-print" style="background:#28a745;">
+            <span>⬇️</span> PDF
+        </button>
+    </div>
+
+    <!-- Defer heavy libraries -->
+    <script src="assets/js/site-api.js"></script>
+    <script>
+        // API_URL provided by site-api.js
+        const API_URL = window.API_URL;
+
+        async function loadReceipt() {
+            if (!API_URL) return showError("System Config Error: Missing API_URL");
+
+            const params = new URLSearchParams(window.location.search);
+            const orderId = params.get('id');
+            const type = params.get('type') || 'customer';
+            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+
+            if (!orderId) return showError("Invalid Link: No Order ID provided");
+            if (!token) return showError("Unauthorized: Please log in to view receipt");
+
+            try {
+                const res = await fetch(`${API_URL}/orders/${orderId}/details`, {
+                    headers: { 'Authorization': token }
+                });
+                const json = await res.json();
+
+                if (!json.success) return showError(json.error || "Failed to fetch order");
+
+                renderReceipt(json.data, type);
+            } catch (e) {
+                console.error(e);
+                showError("Connection Failed. Ensure server is running.");
+            }
+        }
+
+        function renderReceipt(order, type) {
+            const date = new Date(order.created_at).toLocaleString('en-KE', {
+                year: 'numeric', month: 'short', day: 'numeric',
+                hour: '2-digit', minute: '2-digit'
+            });
+            const subtotal = (order.subtotal || 0).toLocaleString();
+            const tax = (order.tax || 0).toLocaleString();
+            const shipping = (order.shipping || 0).toLocaleString();
+            const total = (order.total || 0).toLocaleString();
+
+            // Mask phone for privacy if printed publicly (optional, keeping full for now)
+            const customerPhone = order.customer.phone || 'N/A';
+
+            const copyLabel = type === 'admin' ? 'MERCHANT COPY' : 'CUSTOMER RECEIPT';
+
+            const itemsHtml = order.items.map(i => `
+                <tr>
+                    <td>
+                        <div class="item-name">${i.name}</div>
+                        <div class="item-meta">${i.quantity} x ${parseFloat(i.price).toLocaleString()}</div>
+                    </td>
+                    <td class="col-price">${(i.price * i.quantity).toLocaleString()}</td>
+                </tr>
+            `).join('');
+
+            const html = `
+                <div class="header">
+                    <img src="assets/img/logo-receipt.png" class="brand-logo" onerror="this.src='assets/img/logo.png'; this.style.display='none'">
+                    <div class="brand">
+                        <span class="badge-copy">${copyLabel}</span>
+                        <h1>Tindi Tech</h1>
+                        <p>Tech Solutions & Electronics</p>
+                        <p>+254 700 000 000 | info@tinditech.com</p>
+                    </div>
+                </div>
+
+                <div class="receipt-meta" style="text-align:center;">
+                    <div><strong>ORDER #${order.order_id.substring(0, 8).toUpperCase()}</strong></div>
+                    <div>${date}</div>
+                </div>
+
+                <div class="bill-to">
+                    <div class="section-title">Bill To</div>
+                    <p style="font-weight:600;">${order.customer.name}</p>
+                    <p>${customerPhone}</p>
+                    <p>${order.customer.email || ''}</p>
+                </div>
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th style="text-align:right;">Amount</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHtml}
+                    </tbody>
+                </table>
+
+                <div class="total-section">
+                    <div class="row-flex">
+                        <span>Subtotal</span>
+                        <span>${subtotal}</span>
+                    </div>
+                    <div class="row-flex">
+                        <span>VAT (16%)</span>
+                        <span>${tax}</span>
+                    </div>
+                    <div class="row-flex">
+                        <span>Shipping</span>
+                        <span>${shipping}</span>
+                    </div>
+                    <div class="row-flex total-final">
+                        <span>TOTAL</span>
+                        <span>KES ${total}</span>
+                    </div>
+                </div>
+
+                <div class="footer">
+                    <div class="barcode-placeholder"></div>
+                    <p>Thank you for your business!</p>
+                    <p style="margin-top:5px; font-weight:500;">tinditech.com</p>
+                </div>
+            `;
+
+            document.getElementById('receipt').innerHTML = html;
+            document.title = `Receipt_${order.order_id.substring(0, 8)}`;
+        }
+
+        function showError(msg) {
+            document.getElementById('receipt').innerHTML = `
+                <div style="text-align:center; padding:40px 10px; color:#ef4444;">
+                    <div style="font-size:30px; margin-bottom:10px;">⚠️</div>
+                    <strong>${msg}</strong>
+                </div>
+            `;
+        }
+
+        async function downloadPdf() {
+            // Lazy load html2pdf
+            if (typeof html2pdf === 'undefined') {
+                const btn = document.querySelector('button[onclick="downloadPdf()"]');
+                const originalText = btn.innerHTML;
+                btn.innerHTML = '⌛ Loading Lib...';
+                await new Promise((resolve, reject) => {
+                    const script = document.createElement('script');
+                    script.src = "https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js";
+                    script.onload = resolve;
+                    script.onerror = reject;
+                    document.head.appendChild(script);
+                });
+                btn.innerHTML = originalText;
+            }
+
+            const element = document.getElementById('receipt');
+            const opt = {
+                margin: 0,
+                filename: document.title + '.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2, useCORS: true },
+                jsPDF: { unit: 'mm', format: [80, 297], orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+
+        loadReceipt();
+    </script>
+</body>
+
+</html>

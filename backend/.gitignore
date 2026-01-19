@@ -1,0 +1,44 @@
+# Tindi Tech E-commerce - Git Ignore File
+
+# ============== SENSITIVE FILES ==============
+# NEVER commit these files - they contain secrets!
+# .env (temporarily commented for initial setup)
+*.env
+!.env.example
+!.env
+
+# ============== PYTHON ==============
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environments
+.venv/
+venv/
+ENV/
+env/
+
+# Distribution / packaging
+dist/
+build/
+*.egg-info/
+
+# ============== IDE / EDITOR ==============
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# ============== OS ==============
+.DS_Store
+Thumbs.db
+
+# ============== LOGS ==============
+*.log
+
+# ============== DATABASE ==============
+*.db
+*.sqlite
+*.sqlite3

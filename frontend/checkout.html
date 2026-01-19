@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Checkout - Tindi Tech</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    /* Styles moved to css pracs.css */
+    /* Minimal specific overrides */
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+  </style>
+  <script src="assets/js/site-api.js"></script>
+</head>
+<header>
+  <div class="nav-right">
+    <a href="Home.html"> <img src=assets/img/logo.png class="cart-icon" alt="Tindi Tech 2" /></a>
+  </div>
+  <nav id="navbar">
+    <a href="Home.html">Home</a>
+    <a href="Shop.html">Shop</a>
+    <a href="About.html">About</a>
+    <a href="Contact.html">Contact</a>
+    <a href="Services.html">Services</a>
+    <a href="login.html" class="nav-login-link">Login/Register</a>
+  </nav>
+
+  <div class="nav-right" style="display: flex; align-items: center;">
+    <!-- ADDED MY ORDERS BUTTON -->
+    <a href="My%20Orders.html" class="my-orders-btn" style="text-decoration: none; color: white">My Orders</a>
+
+  </div>
+
+
+  <div class="nav-icons">
+    <a href="My%20Orders.html" style="margin-right: 15px; font-weight: 600;">My Orders</a>
+
+    <a href="cart.html"><img src="assets/img/pics/cart.jpg" class="cart-icon" alt="Cart"></a>
+  </div>
+</header>
+
+<body>
+  <div class="container">
+    <div class="checkout-grid">
+      <!-- Left Column: Details -->
+      <div class="card">
+        <h2>Shipping & Contact Details</h2>
+        <form id="checkoutForm">
+          <div class="form-group">
+            <label for="name">Full Name</label>
+            <input id="name" name="name" required placeholder="John Doe" />
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address</label>
+            <input id="email" name="email" type="email" required placeholder="john@example.com" />
+          </div>
+          <div class="form-group">
+            <label for="phone">M-Pesa Phone Number</label>
+            <div style="display:flex; gap:10px;">
+              <select id="country_code"
+                style="width:120px; padding:10px; border:1px solid #ddd; border-radius:6px; background:white; cursor:pointer;">
+              </select>
+              <input id="phone" name="phone" type="tel" required placeholder="712 345 678" pattern="[0-9 ]*"
+                style="flex:1;" title="Phone Number" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="address">Delivery Address</label>
+            <textarea id="address" name="address" rows="3" required
+              placeholder="Street name, Apartment, City"></textarea>
+          </div>
+          <div style="margin-top: 30px;">
+            <button id="payMpesa" type="submit" class="btn btn-primary">Pay with M-Pesa</button>
+            <div style="margin-top: 15px; text-align: center;">
+              <a href="Shop.html" class="btn btn-secondary" style="font-size: 14px; padding: 10px 15px;">Continue
+                Shopping</a>
+            </div>
+          </div>
+        </form>
+      </div>
+      <!-- Right Column: Order Summary -->
+      <div class="card">
+        <h2>Order Summary</h2>
+        <div id="itemsContainer">
+          <!-- Items will be injected here -->
+        </div>
+        <div style="margin-top: 20px; border-top: 1px solid #eee; padding-top: 15px;">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>KES <span id="subtotal">0</span></span>
+          </div>
+          <div class="summary-row">
+            <span>Tax (16%)</span>
+            <span>KES <span id="taxAmount">0</span></span>
+          </div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <span>KES <span id="shippingAmount">150</span></span>
+          </div>
+          <div class="total-row">
+            <span>Total</span>
+            <span>KES <span id="totalAmount">0</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Popup overlay -->
+  <div id="overlay" class="overlay">
+    <div class="popup">
+      <div id="loadingSpinner" class="spinner"></div>
+      <div id="successIcon" style="display:none; font-size: 50px; color: #28a745; margin-bottom: 20px;">✓</div>
+      <div id="errorIcon" style="display:none; font-size: 50px; color: #dc3545; margin-bottom: 20px;">✕</div>
+      <h3 id="popupTitle">Processing Payment</h3>
+      <p id="popupMsg" style="color: #666; line-height: 1.5;">Please wait while we initiate the M-Pesa request to
+        your phone...</p>
+      <button id="popupClose" class="btn"
+        style="background:#333; color:white; margin-top:20px; display:none;">Close</button>
+    </div>
+  </div>
+  </div>
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-column">
+          <h3>Tindi Tech</h3>
+          <p style="color: #ccc;">Providing innovative networking solutions,<br>
+            IT solutions and services to businesses worldwide.</p>
+        </div>
+
+        <div class="footer-column">
+          <h3>Quick Links</h3>
+          <a href="Home.html">Home</a>
+          <a href="Shop.html">Shop</a>
+          <a href="About.html">About</a>
+          <a href="Contact.html">Contact</a>
+          <a href="Services.html">Services</a>
+          <a href="quote.html">Quote</a>
+        </div>
+
+        <div class="footer-column">
+          <h3>Contact Us</h3>
+          <p style="color: #ccc;">00100, NAIROBI</p>
+          <p style="color: #ccc;">Email: tinditechnologies@gmail.com</p>
+          <p style="color: #ccc;">Phone: (01)10 725 884</p>
+        </div>
+
+        <div class="footer-column">
+          <h3>Follow Us</h3>
+          <div class="social-links">
+            <a href="https://x.com/WizzyAdams4" target="_blank"> <img src="assets/img/x%20image.png" alt="X"></a>
+            <a href="https://www.facebook.com/profile.php?id=100078814762212" target="_blank"><img
+                src="assets/img/facebook.jpeg" alt="FB"></a>
+            <a href="https://www.whatsapp.com/?lang=en" target="_blank"><img src="assets/img/whatsapp.jpeg" alt="WA">
+            </a>
+            <a href="https://www.tiktok.com/@njenga_05?lang=en" target="_blank"><img src="assets/img/tiktok.png"
+                alt="TikTok"></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="copyright">
+        <p>&copy; 2025 Tindi Tech. All Rights Reserved.</p>
+        <p style="font-size: 0.85em; margin-top: 5px;">
+          <a href="#" onclick="showToast('Terms of Service coming soon!', 'info')"
+            style="color:#aaa; text-decoration:none;">Terms
+            of Service</a> |
+          <a href="#" onclick="showToast('Privacy Policy coming soon!', 'info')"
+            style="color:#aaa; text-decoration:none;">Privacy
+            Policy</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+  <script>
+    // ================= CONFIGURATION =================
+    // Set this to FALSE if you have a real backend running
+    const DEMO_MODE = false;
+    const BACKEND_URL = window.API_URL;
+    const TAX_RATE = 0.16;
+    const FLAT_SHIPPING = 150;
+    // =================================================
+    // Load cart from localStorage
+    let cart = [];
+    try {
+      cart = JSON.parse(localStorage.getItem('cart')) || [];
+    } catch (e) {
+      console.error("Cart error", e);
+    }
+    const itemsContainer = document.getElementById('itemsContainer');
+    // Render Cart Items
+    function renderCart() {
+      if (cart.length === 0) {
+        itemsContainer.innerHTML = '<p class="text-center text-muted" style="padding: 20px;">Your cart is empty.</p>';
+        updateTotals();
+        return;
+      }
+      itemsContainer.innerHTML = '';
+      cart.forEach(item => {
+        const price = parseFloat(item.price) || 0;
+        const qty = parseInt(item.quantity) || 1;
+        const imgSrc = item.image || 'img/pics/default-product.png';
+        const el = document.createElement('div');
+        el.className = 'order-item';
+        // FIXED: Replace backslashes with standard string interpolation for browser compat
+        el.innerHTML = `
+          <img src="${imgSrc}" alt="${item.name}">
+          <div class="order-details">
+              <div class="order-name">${item.name}</div>
+              <div class="order-meta">Qty: ${qty}</div>
+          </div>
+          <div class="order-price">${(price * qty).toLocaleString()} KES</div>
+      `;
+        itemsContainer.appendChild(el);
+      });
+      updateTotals();
+    }
+    function updateTotals() {
+      const sub = cart.reduce((s, i) => s + (parseFloat(i.price) || 0) * (parseInt(i.quantity) || 1), 0);
+      const tax = Math.round(sub * TAX_RATE);
+      const shipping = cart.length ? FLAT_SHIPPING : 0;
+      const total = sub + tax + shipping;
+      document.getElementById('subtotal').innerText = sub.toLocaleString();
+      document.getElementById('taxAmount').innerText = tax.toLocaleString();
+      document.getElementById('shippingAmount').innerText = shipping.toLocaleString();
+      document.getElementById('totalAmount').innerText = total.toLocaleString();
+      return { sub, tax, shipping, total };
+    }
+    // Initial render
+    renderCart();
+    // Handle Form Submission
+    const form = document.getElementById('checkoutForm');
+    const overlay = document.getElementById('overlay');
+    const title = document.getElementById('popupTitle');
+    const msg = document.getElementById('popupMsg');
+    const closeBtn = document.getElementById('popupClose');
+    const spinner = document.getElementById('loadingSpinner');
+    const successIcon = document.getElementById('successIcon');
+    const errorIcon = document.getElementById('errorIcon');
+    function showPopup(t, m, isLoading = true, isSuccess = false, isError = false) {
+      overlay.style.display = 'flex';
+      title.innerText = t;
+      msg.innerText = m;
+      spinner.style.display = isLoading ? 'block' : 'none';
+      successIcon.style.display = isSuccess ? 'block' : 'none';
+      errorIcon.style.display = isError ? 'block' : 'none';
+      closeBtn.style.display = isLoading ? 'none' : 'inline-block';
+    }
+    closeBtn.onclick = () => { overlay.style.display = 'none'; };
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      if (cart.length === 0) {
+        if (window.showToast) window.showToast('Your cart is empty. Please add items first.', 'warning');
+        else alert('Your cart is empty. Please add items first.');
+        return;
+      }
+      const customer = {
+        name: form.name.value.trim(),
+        email: form.email.value.trim(),
+        phone: (document.getElementById("country_code").value + form.phone.value).replace(/\s/g, ''),
+        address: form.address.value.trim()
+      };
+      const totals = updateTotals();
+      const payload = {
+        items: cart,
+        ...totals,
+        customer
+      };
+      if (DEMO_MODE) {
+        // --- SIMULATED FLOW ---
+        showPopup('Initiating Payment', 'Please check your phone for the M-Pesa prompt...');
+        // Simulate waiting for user to enter PIN
+        setTimeout(() => {
+          showPopup('Processing...', 'Confirming payment with M-Pesa...');
+          // Simulate success after a few seconds
+          setTimeout(() => {
+            showPopup('Payment Successful!', 'Thank you! Your order has been placed successfully.', false, true, false);
+            // Clear cart
+            localStorage.removeItem('cart');
+            // Redirect after delay (optional)
+          }, 3000);
+        }, 2000);
+      } else {
+        // --- REAL BACKEND FLOW ---
+        try {
+          showPopup('Creating Order', 'Connecting to server...');
+          // 1. Create Order
+          const createRes = await fetch(`${BACKEND_URL}/create-order`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          const createJson = await createRes.json();
+          if (!createJson.success) throw new Error(createJson.message || 'Order creation failed');
+          // 2. STK Push
+          showPopup('M-Pesa Prompt Sent', `A payment request has been sent to ${customer.phone}. Please enter your PIN.`);
+          const stkRes = await fetch(`${BACKEND_URL}/stk-push`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ orderId: createJson.orderId, phone: customer.phone })
+          });
+          const stkJson = await stkRes.json();
+          if (!stkJson.success) throw new Error(stkJson.message || 'STK Push failed');
+          // 3. Poll for status
+          // 3. Poll for status
+          let attempts = 0;
+          const maxAttempts = 20; // 20 * 3s = 60 seconds
+
+          const pollInterval = setInterval(async () => {
+            attempts++;
+
+            // Timeout Check
+            if (attempts > maxAttempts) {
+              clearInterval(pollInterval);
+              showPopup('Request Timed Out', 'We did not receive a payment confirmation in time. Only pay if you see the prompt on your phone.', false, false, true);
+              enableCloseBtn(); // Allow user to close manually
+              return;
+            }
+
+            try {
+              const statusRes = await fetch(`${BACKEND_URL}/order/${createJson.orderId}`);
+              const statusJson = await statusRes.json();
+              if (statusJson.success && statusJson.order.payment.status === 'paid') {
+                clearInterval(pollInterval);
+                showPopup('Payment Received', 'Thank you! Your order is confirmed.', false, true, false);
+                localStorage.removeItem('cart');
+              } else if (statusJson.success && statusJson.order.payment.status === 'failed') {
+                clearInterval(pollInterval);
+                showPopup('Payment Failed', 'The payment was cancelled or failed.', false, false, true);
+              }
+            } catch (err) {
+              console.error("Polling error", err);
+            }
+          }, 3000);
+
+          // Allow manual cancellation
+          closeBtn.onclick = () => {
+            clearInterval(pollInterval);
+            overlay.style.display = 'none';
+          };
+
+          // Helper to show close button during loading if needed (e.g. for long waits)
+          function enableCloseBtn() {
+            closeBtn.style.display = 'inline-block';
+            closeBtn.innerText = 'Close';
+            spinner.style.display = 'none';
+          }
+
+          // Show "Cancel" button after 5 seconds so they aren't trapped
+          setTimeout(() => {
+            if (overlay.style.display !== 'none') {
+              closeBtn.style.display = 'inline-block';
+              closeBtn.innerText = 'Cancel / Close';
+            }
+          }, 5000);
+
+        } catch (err) {
+          console.error(err);
+          showPopup('Error', err.message || 'Something went wrong', false, false, true);
+        }
+      }
+    });
+  </script>
+
+
+  <script src="assets/js/auth.js"></script>
+</body>
+
+</html>

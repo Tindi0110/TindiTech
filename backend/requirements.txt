@@ -1,0 +1,40 @@
+# Tindi Tech E-commerce - Python Dependencies
+
+# Web Framework
+Flask==3.0.0
+
+# Production Server
+gunicorn==21.2.0
+
+# CORS Support
+flask-cors==4.0.0
+
+# HTTP Security Headers
+flask-talisman==1.1.0
+
+# Database
+pymongo==4.6.1
+
+# Password Hashing
+bcrypt==4.1.2
+
+# Environment Variables
+python-dotenv==1.0.0
+
+# Rate Limiting (Security)
+Flask-Limiter==3.5.0
+
+# Email Support
+Flask-Mail==0.9.1
+
+# JWT Authentication
+PyJWT==2.8.0
+
+# HTTP Requests (for M-Pesa)
+requests==2.31.0
+
+# MikroTik Router Integration
+routeros_api==0.17.0
+
+# SSL Certificates (Fix for Windows/Mac)
+certifi

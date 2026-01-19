@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Register - Tindi Tech</title>
+  <!-- Use Standard Fonts -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body class="auth-body">
+  <div class="auth-wrapper">
+    <form id="regForm">
+      <h1>Register</h1>
+      <p>Create a new account to get started.</p>
+
+      <div class="input-box"><input id="fname" type="text" placeholder="First Name" required></div>
+      <div class="input-box"><input id="lname" type="text" placeholder="Last Name" required></div>
+      <div class="input-box"><input id="email" type="email" placeholder="Email" required></div>
+      <div class="input-box" style="display:flex; gap:10px;">
+        <select id="country_code"
+          style="width:110px; height:45px; border:none; border-radius:25px; padding:0 15px; background:white; color:#333; font-family:inherit;font-size:1rem; cursor:pointer;">
+        </select>
+        <input id="phone" type="text" placeholder="Phone (e.g. 712...)" style="flex:1;">
+      </div>
+      <div class="input-box"><input id="username" type="text" placeholder="Username" required></div>
+      <div class="input-box"><input id="password" type="password" placeholder="Password" required></div>
+
+      <!-- ADMIN CODE FIELD -->
+      <div class="input-box">
+        <input id="admin_code" type="text" placeholder="Admin Code (Optional)">
+        <small style="color:#ccc; display:block; text-align:center; font-size:0.8em; margin-top:5px;">Only fill this if
+          you are staff</small>
+      </div>
+
+      <button type="submit" class="auth-btn">Register</button>
+
+      <div class="auth-links" style="justify-content: center; margin-top: 20px;">
+        <span style="color: #ccc;">Already have an account? <a href="login.html" class="auth-link">Login</a></span>
+      </div>
+
+      <p id="status" class="auth-status"></p>
+    </form>
+  </div>
+
+  <script src="assets/js/site-api.js"></script>
+  <script>
+    const API = window.API_URL;
+    document.getElementById("regForm").addEventListener("submit", async function (e) {
+      e.preventDefault();
+      const status = document.getElementById("status");
+      status.innerText = "Registering...";
+      status.style.color = "var(--accent-color)";
+
+      let data = {
+        fname: document.getElementById("fname").value,
+        lname: document.getElementById("lname").value,
+        email: document.getElementById("email").value,
+        phone: (document.getElementById("country_code").value + document.getElementById("phone").value).trim(),
+        username: document.getElementById("username").value,
+        password: document.getElementById("password").value,
+        admin_code: document.getElementById("admin_code").value
+      };
+
+      try {
+        const res = await fetch(`${API}/register`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data)
+        });
+        const result = await res.json();
+
+        if (result.success) {
+          status.style.color = "var(--success-color)";
+          status.innerText = result.message + " Redirecting to verification...";
+          setTimeout(() => {
+            const emailParam = encodeURIComponent(data.email);
+            const phoneParam = encodeURIComponent(data.phone);
+            window.location.href = `verify.html?email=${emailParam}&phone=${phoneParam}`;
+          }, 1500);
+        } else {
+          status.style.color = "var(--danger-color)";
+          status.innerText = result.error;
+        }
+      } catch (err) {
+        status.style.color = "var(--danger-color)";
+        status.innerText = "Server connection failed.";
+      }
+    });
+  </script>
+</body>
+
+</html>

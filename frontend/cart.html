@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Cart - Tindi Tech</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    /* Styles moved to css pracs.css */
+    /* Minimal override used only if necessary */
+    body {
+      background: #f4f6f8;
+    }
+
+    .container-cart-all {
+      max-width: 900px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+  </style>
+</head>
+<header>
+  <div class="logo">
+    <a href="Home.html"> <img src=assets/img/logo.png alt="Tindi Tech" /></a>
+  </div>
+  <nav id="navbar">
+    <a href="Home.html">Home</a>
+    <a href="Shop.html">Shop</a>
+    <a href="About.html">About</a>
+    <a href="Contact.html">Contact</a>
+    <a href="Services.html">Services</a>
+    <a href="login.html" class="nav-login-link">Login/Register</a>
+  </nav>
+  <div class="nav-icons">
+    <a href="My%20Orders.html" style="margin-right: 15px; font-weight: 600;">My Orders</a>
+
+    <a href="cart.html" style="position: relative;">
+      <img src="assets/img/pics/cart.jpg" class="nav-icon" alt="Cart">
+      <span id="cart-count" class="cart-count-badge">0</span>
+    </a>
+  </div>
+</header>
+
+<body>
+  <div class="container-cart-all">
+    <div class="cart-container">
+      <h1>Your Shopping Cart</h1>
+      <!-- Cart Items Container -->
+      <div id="cartItems"></div>
+      <!-- Cart Summary -->
+      <div class="cart-summary">
+        <h2>Cart Summary</h2>
+        <p style="font-size: 1.2em;">Total: <span id="cartTotal" class="text-primary-dark text-bold">0</span> KES
+        </p>
+        <button id="checkoutBtn" class="btn btn-primary">Proceed to Checkout</button>
+      </div>
+    </div>
+  </div>
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-column">
+          <h3>Tindi Tech</h3>
+          <p style="color: #ccc;">Providing innovative networking solutions,<br>
+            IT solutions and services to businesses worldwide.</p>
+        </div>
+
+        <div class="footer-column">
+          <h3>Quick Links</h3>
+          <a href="Home.html">Home</a>
+          <a href="Shop.html">Shop</a>
+          <a href="About.html">About</a>
+          <a href="Contact.html">Contact</a>
+          <a href="Services.html">Services</a>
+          <a href="quote.html">Quote</a>
+        </div>
+
+        <div class="footer-column">
+          <h3>Contact Us</h3>
+          <p style="color: #ccc;">00100, NAIROBI</p>
+          <p style="color: #ccc;">Email: tinditechnologies@gmail.com</p>
+          <p style="color: #ccc;">Phone: (01)10 725 884</p>
+        </div>
+
+        <div class="footer-column">
+          <h3>Follow Us</h3>
+          <div class="social-links">
+            <a href="https://x.com/WizzyAdams4" target="_blank"> <img src="assets/img/x%20image.png" alt="X"></a>
+            <a href="https://www.facebook.com/profile.php?id=100078814762212" target="_blank"><img
+                src="assets/img/facebook.jpeg" alt="FB"></a>
+            <a href="https://www.whatsapp.com/?lang=en" target="_blank"><img src="assets/img/whatsapp.jpeg" alt="WA">
+            </a>
+            <a href="https://www.tiktok.com/@njenga_05?lang=en" target="_blank"><img src="assets/img/tiktok.png"
+                alt="TikTok"></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="copyright">
+        &copy; 2025 Tindi Tech. All Rights Reserved.
+      </div>
+    </div>
+  </footer>
+  <script>
+    /* ---------------------------
+       CART SYSTEM USING LOCALSTORAGE
+    ---------------------------- */
+    // Get saved cart or empty list
+    let cart = [];
+    try {
+      cart = JSON.parse(localStorage.getItem("cart")) || [];
+    } catch (e) {
+      // Corrupted data - reset to empty cart
+      cart = [];
+      localStorage.setItem("cart", "[]");
+    }
+    // Load cart when page opens
+    window.onload = function () {
+      displayCart();
+    };
+    // Display cart items
+    function displayCart() {
+      const container = document.getElementById("cartItems");
+      const totalEl = document.getElementById("cartTotal");
+      container.innerHTML = "";
+      if (!cart || cart.length === 0) {
+        container.innerHTML = "<p class='empty-cart'>Your cart is empty. Looks like you have not added anything in the cart yet.</p>";
+        totalEl.textContent = "0";
+        return;
+      }
+      let total = 0;
+      cart.forEach((item, index) => {
+        // Validation
+        const price = parseFloat(item.price) || 0;
+        const quantity = parseInt(item.quantity) || 1;
+        // Ensure local state is consistent
+        item.price = price;
+        item.quantity = quantity;
+        const itemTotal = price * quantity;
+        total += itemTotal;
+        // Image fallback
+        const imgSrc = item.image || 'img/pics/default-product.png';
+        container.innerHTML += `
+            <div class="cart-item">
+                <img src="${imgSrc}" class="cart-img" alt="${item.name}">
+                <div class="cart-info">
+                    <h3>${item.name}</h3>
+                    <p>Price: ${price} KES</p>
+                    <p>Subtotal: ${itemTotal} KES</p>
+                    <div class="qty-box">
+                        <button onclick="changeQty(${index}, -1)">-</button>
+                        <span>${quantity}</span>
+                        <button onclick="changeQty(${index}, 1)">+</button>
+                    </div>
+                </div>
+                <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+            </div>
+        `;
+      });
+      totalEl.textContent = total;
+    }
+    // Change quantity
+    function changeQty(index, amount) {
+      if (cart[index]) {
+        const currentQty = parseInt(cart[index].quantity) || 0;
+        const newQty = currentQty + amount;
+
+        // Stock Check for increase
+        if (amount > 0) {
+          const max = cart[index].maxStock || 999; // Default high if missing, but should be there
+          if (newQty > max) {
+            showToast(`Sorry, only ${max} units available in stock.`, 'warning');
+            return;
+          }
+        }
+
+        cart[index].quantity = newQty;
+        if (cart[index].quantity <= 0) {
+          cart.splice(index, 1);
+        }
+        saveCart();
+        displayCart();
+      }
+    }
+    // Remove item
+    function removeItem(index) {
+      cart.splice(index, 1);
+      saveCart();
+      displayCart();
+    }
+    // Save cart to localStorage
+    function saveCart() {
+      localStorage.setItem("cart", JSON.stringify(cart));
+    }
+    // Checkout button
+    const checkoutBtn = document.getElementById("checkoutBtn");
+    if (checkoutBtn) {
+      checkoutBtn.onclick = () => {
+        if (cart.length === 0) {
+          showToast("Your cart is empty!", 'info');
+        } else {
+          // Redirect to checkout page
+          window.location.href = "checkout.html";
+        }
+      }
+    }
+  </script>
+  <script src="assets/js/site-api.js"></script>
+  <script src="assets/js/auth.js"></script>
+</body>
+
+</html>

@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>My Orders - Tindi Tech</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <style>
+    /* Styles moved to css pracs.css */
+    /* Minimal override used only if necessary */
+    .container {
+      max-width: 1000px;
+      margin: 40px auto;
+      padding: 0 20px;
+    }
+  </style>
+  <script src="assets/js/site-api.js"></script>
+  <script>
+    window.onerror = function (msg, url, lineNo, columnNo, error) {
+      document.body.innerHTML = `
+            <div style="padding:20px; color:red; font-family:monospace; background:white;">
+                <h3>Global Error Caught</h3>
+                <p><strong>Message:</strong> ${msg}</p>
+                <p><strong>URL:</strong> ${url}</p>
+                <p><strong>Line:</strong> ${lineNo}, <strong>Col:</strong> ${columnNo}</p>
+                <p><strong>Stack:</strong> ${error ? error.stack : 'N/A'}</p>
+            </div>
+        `;
+      return false;
+    };
+  </script>
+</head>
+
+<body>
+  <header>
+    <div class="logo">
+      <a href="Home.html"> <img src=assets/img/logo.png alt="Tindi Tech" /></a>
+    </div>
+    <nav id="navbar">
+      <a href="Home.html">Home</a>
+      <a href="Shop.html">Shop</a>
+      <a href="About.html">About</a>
+      <a href="Contact.html">Contact</a>
+      <a href="Services.html">Services</a>
+      <a href="#" onclick="logoutUser()" style="color:red;">Logout</a>
+    </nav>
+    <div class="nav-icons">
+      <a href="cart.html" style="position: relative;">
+        <img src="assets/img/cart.jpg" class="nav-icon" alt="Cart">
+        <span id="cart-count" class="cart-count-badge">0</span>
+      </a>
+    </div>
+  </header>
+  <div class="container">
+    <div id="authWarning" class="auth-warning" style="display: none;">
+      <h2>Please Log In</h2>
+      <p>You need to be logged in to view your order receipt history.</p>
+      <a href="login.html?redirect=My%20Orders.html" class="btn btn-primary">Go to Login</a>
+      <p style="margin-top: 20px; font-size: 0.9em;">
+        Don't have an account? <a href="register.html" class="text-primary text-bold">Sign Up
+          here</a>
+      </p>
+    </div>
+    <div id="ordersContent" style="display: none;">
+      <div class="page-header">
+        <h1>My Order History</h1>
+      </div>
+      <div id="ordersList">
+        <p style="text-align:center;">Loading orders...</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // const API_URL = "http://127.0.0.1:5000";
+    // API_URL might be defined in site-api.js. Use window.API_URL if needed, or rely on global.
+    const apiUrl = window.API_URL;
+    // From site-api.js
+    // User needs a token to identify their orders (Backend finds user by token)
+    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+
+    async function loadOrders() {
+      if (!token) {
+        document.getElementById('authWarning').style.display = 'block';
+        document.getElementById('ordersContent').style.display = 'none';
+        return;
+      }
+      try {
+        const res = await fetch(`${API_URL}/my-orders`, {
+          headers: { 'Authorization': token }
+        });
+        const json = await res.json();
+        if (json.success) {
+          document.getElementById('authWarning').style.display = 'none';
+          document.getElementById('ordersContent').style.display = 'block';
+          renderOrders(json.data);
+        } else {
+          document.getElementById('ordersContent').style.display = 'block';
+          document.getElementById('ordersList').innerHTML = `<p>Error: ${json.error}</p>`;
+        }
+      } catch (e) {
+        console.error(e);
+        document.getElementById('ordersContent').style.display = 'block';
+        document.getElementById('ordersList').innerHTML = `<p>Failed to connect to server.</p>`;
+      }
+    }
+    function renderOrders(orders) {
+      const container = document.getElementById('ordersList');
+      if (orders.length === 0) {
+        container.innerHTML = `<p style="text-align:center; color:#666;">You haven't placed any orders yet.</p>`;
+        return;
+      }
+      container.innerHTML = orders.map(order => {
+        const status = order.status || 'pending';
+        const date = new Date(order.created_at).toLocaleDateString();
+        const total = (order.total || 0).toLocaleString();
+        // Items list
+        const itemsHtml = order.items.map(i => `
+                    <div class="order-item-row">
+                        <span>${i.name} (x${i.quantity})</span>
+                        <span>${parseFloat(i.price).toLocaleString()}</span>
+                    </div>
+                `).join('');
+        // Buttons
+        let actionBtn = '';
+        if (status === 'pending' || status === 'processing') {
+          actionBtn = `<button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8em; color: red; border-color: red;" onclick="cancelOrder('${order.order_id}')">Cancel Order</button>`;
+        } else if (status === 'completed') {
+          actionBtn = `<button class="btn btn-warning-outline" style="padding: 5px 10px; font-size: 0.8em;" onclick="requestRefund('${order.order_id}')">Request Refund</button>`;
+        } else if (status === 'refund_requested') {
+          actionBtn = `<span style="color:#ffc107; font-size:0.9em;">Refund Requested</span>`;
+        } else if (status === 'refunded') {
+          actionBtn = `<span style="color:#666; font-size:0.9em;">Refunded</span>`;
+        }
+
+        return `
+                <div class="order-card">
+                    <div class="order-header">
+                        <div>
+                            <span class="order-id">#${order.order_id ? order.order_id.substring(0, 8) : 'N/A'}</span>
+                            <span class="order-date"> • ${date}</span>
+                        </div>
+                        <span class="status-badge status-${status}">${status.replace('_', ' ')}</span>
+                    </div>
+                    <div class="order-items">
+                        ${itemsHtml}
+                    </div>
+                     <div class="order-footer">
+                        <span class="order-total">Total: KES ${total}</span>
+                        <div style="display:flex; gap:10px;">
+                             <button onclick="openReceiptModal('${order.order_id}', 'customer')" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8em;">📄 Receipt</button>
+                             ${actionBtn}
+                        </div>
+                    </div>
+                </div>
+            `;
+      }).join('');
+    }
+
+    // --- RECEIPT MODAL ---
+    function openReceiptModal(orderId, type) {
+      const url = `receipt.html?id=${orderId}&type=${type}`;
+      let modal = document.getElementById('receipt-modal-overlay');
+      if (!modal) {
+        document.body.insertAdjacentHTML('beforeend', `
+                <div id="receipt-modal-overlay" style="display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:2000; align-items:center; justify-content:center;">
+                    <div style="background:white; width:800px; max-width:95%; height:90vh; border-radius:8px; overflow:hidden; display:flex; flex-direction:column;">
+                        <div style="padding:10px 15px; background:#f8f9fa; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
+                            <h3 style="margin:0; font-size:18px;">Receipt Preview</h3>
+                            <button onclick="document.getElementById('receipt-modal-overlay').style.display='none'" style="border:none; background:none; font-size:24px; cursor:pointer;">&times;</button>
+                        </div>
+                        <iframe id="receipt-frame" style="width:100%; height:100%; border:none;" src=""></iframe>
+                    </div>
+                </div>
+            `);
+        modal = document.getElementById('receipt-modal-overlay');
+      }
+      document.getElementById('receipt-frame').src = url;
+      modal.style.display = 'flex';
+    }
+    async function cancelOrder(id) {
+      if (!await secureConfirm("Are you sure you want to PERMANENTLY DELETE this order?", "Delete", true)) return;
+      try {
+        const res = await fetch(`${API_URL}/my-orders/${id}/cancel`, {
+          method: 'PATCH',
+          headers: { 'Authorization': token }
+        });
+        const json = await res.json();
+        if (json.success) {
+          showToast("Order deleted successfully.", 'success');
+          loadOrders(); // Refresh
+        } else {
+          console.error("Delete failed:", json);
+          showToast("Error: " + (json.error || "Unknown error"), 'error');
+        }
+      } catch (e) {
+        console.error("Delete request error:", e);
+        showToast("Failed to delete order. Check console for details.", 'error');
+      }
+    }
+
+    async function requestRefund(id) {
+      if (!await secureConfirm("Initiate a refund request for this order?", "Request Refund")) return;
+      try {
+        const res = await fetch(`${API_URL}/my-orders/${id}/refund-request`, {
+          method: 'POST',
+          headers: { 'Authorization': token }
+        });
+        const json = await res.json();
+        if (json.success) {
+          showToast("Refund requested successfully. Admin will review.", 'success');
+          loadOrders();
+        } else {
+          showToast("Error: " + json.error, 'error');
+        }
+      } catch (e) {
+        showToast("Failed to request refund.", 'error');
+      }
+    }
+
+    // Auto-logout when leaving the page (or refreshing) - DISABLED as per request for manual logout
+    // window.addEventListener('beforeunload', function () { ... });
+
+    async function logoutUser() {
+      if (!await secureConfirm("Are you sure you want to log out?", "Logout", true)) return;
+      localStorage.removeItem("token");
+      localStorage.removeItem("user_name");
+      localStorage.removeItem("user_email");
+      localStorage.removeItem("user_role");
+      sessionStorage.clear(); // Clear session as well
+      window.location.href = "Home.html";
+    }
+    // Init
+    document.addEventListener('DOMContentLoaded', loadOrders);
+  </script>
+</body>

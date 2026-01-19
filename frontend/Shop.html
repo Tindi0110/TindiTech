@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Shop - Tindi Tech</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+
+  <style>
+    /* 
+      All styles have been moved to css pracs.css for the Premium Design System.
+    */
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">
+      <a href="Home.html"> <img src=assets/img/logo.png alt="Tindi Tech" /></a>
+    </div>
+    <nav id="navbar">
+      <a href="Home.html">Home</a>
+      <a href="Shop.html">Shop</a>
+      <a href="About.html">About</a>
+      <a href="Contact.html">Contact</a>
+      <a href="Services.html">Services</a>
+      <a href="login.html" class="nav-login-link">Login/Register</a>
+    </nav>
+    <div class="nav-icons">
+
+      <!-- LINK TO THE CART PAGE -->
+      <!-- LINK TO THE CART PAGE -->
+      <a href="cart.html" style="position: relative;">
+        <img src="assets/img/pics/cart.jpg" class="nav-icon" alt="Cart">
+        <span id="cart-count" class="cart-count-badge">0</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- PAGE TITLE -->
+  <div class="page-header">
+    <h1>Our Products</h1>
+    <p>Explore our enterprise-grade networking solutions.</p>
+  </div>
+
+  <!-- PRODUCT SECTION -->
+  <div class="section-padding">
+    <div class="container">
+      <!-- Search Bar -->
+      <div class="search-wrapper">
+        <input type="text" class="search-input" id="shopSearch" placeholder="Search products..."
+          onkeyup="handleSearch(this.value)">
+        <button class="search-icon-btn" onclick="handleSearch(document.getElementById('shopSearch').value)">
+          <img src="https://img.icons8.com/ios-filled/50/ffffff/search--v1.png" alt="Search"
+            style="width:20px; height:20px;">
+        </button>
+      </div>
+
+      <div class="products-grid">
+        <!-- Products loaded via site-api.js -->
+      </div>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-column">
+          <h3>Tindi Tech</h3>
+          <p style="color: #ccc;">Providing innovative networking solutions,<br>
+            IT solutions and services to businesses worldwide.</p>
+        </div>
+
+        <div class="footer-column">
+          <h3>Quick Links</h3>
+          <a href="Home.html">Home</a>
+          <a href="Shop.html">Shop</a>
+          <a href="About.html">About</a>
+          <a href="Contact.html">Contact</a>
+          <a href="Services.html">Services</a>
+          <a href="quote.html">Quote</a>
+        </div>
+
+        <div class="footer-column">
+          <h3>Contact Us</h3>
+          <p style="color: #ccc;">00100, NAIROBI</p>
+          <p style="color: #ccc;">Email: tindievans0110@gmail.com</p>
+          <p style="color: #ccc;">Phone: (01)10 725 884</p>
+        </div>
+
+        <div class="footer-column">
+          <h3>Follow Us</h3>
+          <div class="social-links">
+            <a href="https://x.com/WizzyAdams4" target="_blank"> <img src="assets/img/x%20image.png" alt="X"></a>
+            <a href="https://www.facebook.com/profile.php?id=100078814762212" target="_blank"><img
+                src="assets/img/facebook.jpeg" alt="FB"></a>
+            <a href="https://www.whatsapp.com/?lang=en" target="_blank"><img src="assets/img/whatsapp.jpeg" alt="WA"> </a>
+            <a href="https://www.tiktok.com/@njenga_05?lang=en" target="_blank"><img src="assets/img/tiktok.png"
+                alt="TikTok"></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="copyright">
+        &copy; 2025 Tindi Tech. All Rights Reserved.
+      </div>
+    </div>
+  </footer>
+
+  <!-- JAVASCRIPT CART SYSTEM -->
+
+  <!-- PRODUCT DETAIL POPUP (Hidden by default) -->
+  <div id="productDetailModal" class="product-detail-modal">
+    <div class="product-detail-content">
+      <span class="detail-close" onclick="closeDetailModal()">&times;</span>
+      <div class="detail-image-side">
+        <img id="detailImg" src="" alt="Product Image">
+      </div>
+      <div class="detail-info-side">
+        <h2 id="detailName" style="color: var(--text-dark); margin-bottom: 10px;">Product Name</h2>
+        <div id="detailPrice" class="detail-price">0 KES</div>
+        <p id="detailDesc" style="line-height: 1.8; color: #555;">
+          Description details here...
+        </p>
+        <div class="btn-group">
+          <button id="detailAddBtn" class="btn btn-primary">Add to Cart</button>
+          <button class="btn btn-outline" style="color:#555; border-color:#ccc;"
+            onclick="closeDetailModal()">Close</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="assets/js/site-api.js"></script>
+  <script src="assets/js/auth.js"></script>
+  <script>
+    // Debounce function for search
+    let timeout = null;
+    function handleSearch(query) {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => {
+        fetchProducts(query);
+      }, 500);
+    }
+  </script>
+</body>
+
+</html>

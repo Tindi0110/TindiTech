@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Tindi Tech Connection Tester</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #222;
+      color: #0f0;
+    }
+
+    .success {
+      color: #0f0;
+    }
+
+    .error {
+      color: #f00;
+    }
+
+    .box {
+      border: 1px solid #444;
+      padding: 10px;
+      margin-bottom: 10px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>Backend Connection Diagnoser</h1>
+  <p>Opening this file tests if your browser can talk to your Python server.</p>
+  <div class="box">
+    <h3>Test 1: Ping Server (http://127.0.0.1:5000)</h3>
+    <div id="test1">Testing...</div>
+  </div>
+  <div class="box">
+    <h3>Test 2: Fetch Products</h3>
+    <div id="test2">Waiting...</div>
+  </div>
+  <div class="box">
+    <h3>Test 3: Browser Constraints</h3>
+    <div id="test3">Checking...</div>
+  </div>
+  <script src="assets/js/site-api.js"></script>
+  <script>
+    // const API_URL = "http://127.0.0.1:5000";
+    const API_URL = window.API_URL;
+    async function runTests() {
+      // Test 1: Basic Ping (using products as a ping)
+      try {
+        const start = Date.now();
+        const res = await fetch(`${API_URL}/products`);
+        const time = Date.now() - start;
+        if (res.ok) {
+          document.getElementById('test1').innerHTML = `<span class="success">✅ SUCCESS! Connected in ${time}ms.</span>`;
+          document.getElementById('test1').innerHTML += `<br>Server is responding correctly.`;
+        } else {
+          document.getElementById('test1').innerHTML = `<span class="error">⚠️ Connected, but server returned ${res.status} ${res.statusText}.</span>`;
+        }
+        // Test 2: Data Check
+        try {
+          const json = await res.json();
+          document.getElementById('test2').innerHTML = `<span class="success">✅ SUCCESS! Received valid JSON data.</span>`;
+          document.getElementById('test2').innerHTML += `<br>Found ${json.data ? json.data.length : 0} products.`;
+        } catch (e) {
+          document.getElementById('test2').innerHTML = `<span class="error">❌ Failed to parse JSON. Server might be sending HTML errors.</span>`;
+        }
+      } catch (err) {
+        console.error(err);
+        let msg = "❌ CONNECTION FAILED.";
+        if (err.message.includes("Failed to fetch")) {
+          msg += "<br>Possible Causes:<br>1. Python server is NOT running.<br>2. CORS blocking (check console).<br>3. Port mismatch (is server on 5000?)";
+        } else {
+          msg += `<br>Error: ${err.message}`;
+        }
+        document.getElementById('test1').innerHTML = `<span class="error">${msg}</span>`;
+        document.getElementById('test2').innerHTML = "Skipped due to connection failure.";
+      }
+      // Test 3: Environment
+      const protocol = window.location.protocol;
+      document.getElementById('test3').innerHTML = `Current Protocol: <b>${protocol}</b> (Should be 'file:' or 'http:')`;
+    }
+    runTests();
+  </script>
+</body>
+
+</html>

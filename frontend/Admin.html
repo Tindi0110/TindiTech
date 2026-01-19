@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Tindi Tech</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="assets/js/chart.min.js"></script>
+  <script src="assets/js/site-api.js"></script>
+  <style>
+    :root {
+      --primary: #03208f;
+      --primary-dark: #021666;
+      --bg: #f4f6f8;
+      --white: #ffffff;
+      --text-dark: #1a1a1a;
+      --text-gray: #666;
+      --border: #e0e0e0;
+      --success: #28a745;
+      --danger: #dc3545;
+      --warning: #ffc107;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text-dark);
+      margin: 0;
+      display: flex;
+      height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 250px;
+      background: var(--primary);
+      color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 20px 0;
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 700;
+      padding: 0 25px 30px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .nav-link {
+      padding: 15px 25px;
+      color: rgba(255, 255, 255, 0.8);
+      text-decoration: none;
+      cursor: pointer;
+      transition: 0.2s;
+      display: flex;
+      align-items: center;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      background: rgba(255, 255, 255, 0.1);
+      color: white;
+      border-left: 4px solid white;
+    }
+
+    /* Main Content */
+    .main {
+      flex: 1;
+      padding: 30px;
+      overflow-y: auto;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border-radius: 6px;
+      border: none;
+      cursor: pointer;
+      font-weight: 600;
+      transition: 0.2s;
+    }
+
+    .btn-primary {
+      background: var(--primary);
+      color: white;
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-sm {
+      padding: 5px 10px;
+      font-size: 12px;
+    }
+
+    /* Sections */
+    .section {
+      display: none;
+    }
+
+    .section.active {
+      display: block;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+    }
+
+    .stat-val {
+      font-size: 28px;
+      font-weight: 700;
+      color: var(--primary);
+    }
+
+    .stat-label {
+      color: var(--text-gray);
+      font-size: 14px;
+    }
+
+    /* Search & Pagination */
+    .search-bar {
+      margin-bottom: 15px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .search-input {
+      padding: 8px 12px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      width: 250px;
+    }
+
+    .pagination-controls {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin-top: 20px;
+      align-items: center;
+    }
+
+    .page-btn {
+      padding: 6px 12px;
+      border: 1px solid #ddd;
+      background: white;
+      cursor: pointer;
+      border-radius: 4px;
+      transition: 0.2s;
+    }
+
+    .page-btn:hover:not(:disabled) {
+      background: var(--primary);
+      color: white;
+    }
+
+    .page-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+
+    /* Tables */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    th,
+    td {
+      padding: 15px 20px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+    }
+
+    th {
+      background: #fafafa;
+      font-weight: 600;
+      color: var(--text-gray);
+    }
+
+    /* Table Action Buttons: Ensure visibility */
+    table .btn {
+      opacity: 1 !important;
+      visibility: visible !important;
+      display: inline-block;
+    }
+
+    /* Status Badges/Select */
+    .status-select {
+      padding: 5px;
+      border-radius: 4px;
+      border: 1px solid #ddd;
+      font-weight: 600;
+    }
+
+    .status-pending {
+      background: #fff3cd;
+      color: #856404;
+    }
+
+    .status-processing {
+      background: #cce5ff;
+      color: #004085;
+    }
+
+    .status-completed {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-paid {
+      background: #d4edda;
+      color: #155724;
+    }
+
+    .status-canceled {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .status-failed {
+      background: #f8d7da;
+      color: #721c24;
+    }
+
+    .status-refunded {
+      background: #e2e3e5;
+      color: #383d41;
+      text-decoration: line-through;
+    }
+
+    .status-refund_requested {
+      background: #ffeeba;
+      color: #856404;
+      font-weight: bold;
+      border: 1px solid #ffc107;
+    }
+
+    /* Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      width: 400px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-size: 14px;
+      font-weight: 500;
+    }
+
+    .form-input {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 6px;
+      box-sizing: border-box;
+    }
+
+    .filter-bar {
+      margin-bottom: 20px;
+      display: flex;
+      gap: 10px;
+    }
+
+    .filter-btn {
+      background: white;
+      border: 1px solid #ddd;
+      padding: 5px 15px;
+      border-radius: 20px;
+      cursor: pointer;
+    }
+
+    .filter-btn.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .btn-wa {
+      background: #25D366;
+      color: white;
+    }
+
+    .btn-sms {
+      background: #007bff;
+      color: white;
+    }
+
+    .btn-action-group {
+      display: flex;
+      gap: 5px;
+    }
+
+    /* Image Upload Styles */
+    .image-upload-container {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .image-preview {
+      width: 100%;
+      max-height: 200px;
+      object-fit: contain;
+      border: 2px dashed #ddd;
+      border-radius: 6px;
+      padding: 10px;
+      box-sizing: border-box;
+      display: none;
+    }
+
+    .image-preview.show {
+      display: block;
+    }
+
+    .upload-btn-wrapper {
+      position: relative;
+      overflow: hidden;
+      display: inline-block;
+      width: 100%;
+    }
+
+    .upload-btn {
+      background: var(--primary);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 6px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      text-align: center;
+      display: block;
+    }
+
+    .upload-btn-wrapper input[type=file] {
+      font-size: 100px;
+      position: absolute;
+      left: 0;
+      top: 0;
+      opacity: 0;
+      cursor: pointer;
+    }
+
+    .image-mode-toggle {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .image-mode-toggle button {
+      flex: 1;
+      padding: 8px;
+      border: 1px solid #ddd;
+      background: white;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .image-mode-toggle button.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+  </style>
+</head>
+
+<body>
+  <script src="assets/js/site-api.js"></script>
+  <script>
+    // --- GLOBAL EVENT DELEGATION SYSTEM ---
+    document.addEventListener('click', function (e) {
+      const target = e.target.closest('[data-action]');
+      if (!target) return;
+
+      const action = target.dataset.action;
+      const id = target.dataset.id;
+
+      handleAction(action, id, target);
+    });
+
+    document.addEventListener('change', function (e) {
+      const target = e.target.closest('[data-action]');
+      if (!target) return;
+
+      const action = target.dataset.action;
+      const id = target.dataset.id;
+
+      // Ensure we capture value from select elements correctly
+      let value = target.value;
+      if (target.tagName === 'SELECT') {
+        value = target.options[target.selectedIndex].value;
+      }
+
+      handleAction(action, id, target, value);
+    });
+
+    // --- RECEIPT MODAL LOGIC ---
+    function openReceiptModal(orderId, type) {
+      const url = `receipt.html?id=${orderId}&type=${type}`;
+      let modal = document.getElementById('receipt-modal-overlay');
+      if (!modal) {
+        document.body.insertAdjacentHTML('beforeend', `
+                <div id="receipt-modal-overlay" style="display:flex; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.5); z-index:9999; align-items:center; justify-content:center;">
+                    <div style="background:white; width:800px; max-width:95%; height:90vh; border-radius:8px; overflow:hidden; display:flex; flex-direction:column;">
+                        <div style="padding:10px 15px; background:#f8f9fa; border-bottom:1px solid #ddd; display:flex; justify-content:space-between; align-items:center;">
+                            <h3 style="margin:0; font-size:18px;">Receipt Preview</h3>
+                            <button onclick="document.getElementById('receipt-modal-overlay').style.display='none'" style="border:none; background:none; font-size:24px; cursor:pointer;">&times;</button>
+                        </div>
+                        <iframe id="receipt-frame" style="width:100%; height:100%; border:none;" src=""></iframe>
+                    </div>
+                </div>
+            `);
+        modal = document.getElementById('receipt-modal-overlay');
+      }
+      document.getElementById('receipt-frame').src = url;
+      modal.style.display = 'flex';
+    }
+
+
+    // Central Action Router
+    async function handleAction(action, id, target, value) {
+      // Defensive: Re-read value if missing/undefined
+      if (action === 'updateStatus' && (!value || value === 'undefined')) {
+        if (target && target.tagName === 'SELECT') {
+          value = target.value;
+        }
+      }
+
+      try {
+        switch (action) {
+          case 'openReceipt':
+            openReceiptModal(id, 'admin');
+            break;
+
+          case 'deleteOrder':
+            if (!await secureConfirm("Permanently delete this order?", "Delete Order", true)) return;
+            await performApiCall(`/orders/${id}`, 'DELETE', 'Order deleted');
+            loadOrders();
+            loadStats();
+            break;
+
+          case 'updateStatus':
+            // value is the new status
+            if (!await secureConfirm(`Change order status to '${value}'?`)) {
+              loadOrders(); return;
+            }
+            await performApiCall(`/orders/${id}`, 'PATCH', 'Status Updated', { status: value });
+            loadOrders();
+            loadStats();
+            break;
+
+          case 'refundApprove':
+          case 'refundDecline':
+            const refundAction = action === 'refundApprove' ? 'approve' : 'decline';
+            if (!await secureConfirm(`Confirm ${refundAction} refund?`, "Yes, Proceed", true)) return;
+            await performApiCall(`/orders/${id}/refund-action`, 'POST', `Refund ${refundAction}d`, { action: refundAction });
+            loadOrders();
+            loadStats();
+            break;
+
+          case 'deleteProduct':
+            if (!await secureConfirm("Delete this product?", "Delete", true)) return;
+            await performApiCall(`/products/${id}`, 'DELETE', 'Product deleted');
+            loadProducts();
+            break;
+
+          case 'deleteUser':
+            if (!await secureConfirm("Permanently delete this user?", "Delete", true)) return;
+            await performApiCall(`/users/${id}`, 'DELETE', 'User deleted');
+            loadUsers();
+            loadStats();
+            break;
+
+          case 'forceLogout':
+            if (!await secureConfirm("Force logout this user?", "Logout", true)) return;
+            await performApiCall(`/users/${id}/logout`, 'POST', 'User logged out');
+            loadUsers();
+            break;
+
+          case 'deleteMessage':
+            if (!await secureConfirm("Delete this message?", "Delete", true)) return;
+            await performApiCall(`/messages/${id}`, 'DELETE', 'Message deleted');
+            loadMessages();
+            break;
+
+          case 'deleteQuote':
+            if (!await secureConfirm("Delete this quote?", "Delete", true)) return;
+            await performApiCall(`/quotes/${id}`, 'DELETE', 'Quote deleted');
+            loadMessages();
+            break;
+
+          case 'deleteWifiSession':
+            if (!await secureConfirm("Delete this WiFi session?", "Delete", true)) return;
+            await performApiCall(`/admin/wifi-sessions/${id}`, 'DELETE', 'Session deleted');
+            loadWifiSessions();
+            break;
+
+          case 'openProductEdit':
+            const pData = JSON.parse(target.dataset.product);
+            openProductModal(pData);
+            break;
+
+          case 'openReceipt':
+            openReceiptModal(id, 'admin');
+            break;
+
+          default:
+            // Unknown action
+            break;
+        }
+      } catch (e) {
+        console.error(e);
+        showToast("Action Failed: " + e.message, 'error');
+      }
+    }
+
+    async function performApiCall(endpoint, method, successMsg, body = null) {
+      const opts = { method: method };
+      if (body) opts.body = JSON.stringify(body);
+
+      const res = await fetchAuth(window.API_URL + endpoint, opts);
+      const json = await res.json();
+
+      if (json.success) {
+        if (successMsg) showToast(successMsg, 'success');
+        return json;
+      } else {
+        // If it's a GET request (like stats) we might want to return null/handle quietly instead of throwing blindly? 
+        // But for now, let's throw to keep consistency, but callers like loadStats need to catch it.
+        throw new Error(json.error || "Unknown Error");
+      }
+    }
+  </script>
+
+  <!-- Sidebar & Main Layout -->
+  <div class="sidebar">
+    <div class="brand">Tindi Tech Admin</div>
+    <div class="nav-link active" onclick="showSection('dashboard', this)">Dashboard</div>
+    <div class="nav-link" onclick="showSection('orders', this)">Orders</div>
+    <div class="nav-link" onclick="showSection('products', this)">Products</div>
+    <div class="nav-link" onclick="showSection('users', this)">Registered Users</div>
+    <div class="nav-link" onclick="showSection('messages', this)">Messages & Quotes</div>
+    <div class="nav-link" onclick="showSection('wifi', this)">ISP Manager</div>
+    <div class="nav-link" onclick="logout()" style="margin-top:auto">Logout</div>
+  </div>
+  <div class="main">
+    <!-- DASHBOARD -->
+    <div id="dashboard" class="section active">
+      <div class="header">
+        <h1>Dashboard Overview</h1>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="total-revenue">0</div>
+          <div class="stat-label">Total Revenue (KES)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="pending-revenue" style="color:var(--warning);">0</div>
+          <div class="stat-label">Pending Revenue (KES)</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="active-wifi">0</div>
+          <div class="stat-label">Active WiFi Users</div>
+        </div>
+        <div class="stat-card" onclick="showSection('users', document.querySelector('.nav-link[onclick*=\'users\']'))"
+          style="cursor: pointer;">
+          <div class="stat-val" id="total-users">0</div>
+          <div class="stat-label">Registered Users (Click to Manage)</div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div style="display:flex; gap:20px; margin-top:30px; flex-wrap:wrap;">
+        <div
+          style="flex:1; background:white; padding:20px; border-radius:8px; border:1px solid #e0e0e0; min-width:300px;">
+          <h3 style="margin-bottom:15px; color:#333;">Revenue Trend (Last 7 Days)</h3>
+          <div style="position: relative; height: 300px;">
+            <canvas id="revenueChart"></canvas>
+          </div>
+        </div>
+        <div
+          style="flex:1; background:white; padding:20px; border-radius:8px; border:1px solid #e0e0e0; min-width:300px;">
+          <h3 style="margin-bottom:15px; color:#333;">Order Status Distribution</h3>
+          <div style="position: relative; height: 300px; display:flex; justify-content:center;">
+            <canvas id="statusChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- ORDERS -->
+    <div id="orders" class="section">
+      <div class="header">
+        <h1>Orders Management</h1>
+      </div>
+      <div class="search-bar">
+        <input type="text" class="search-input" id="search-orders" placeholder="Search Order ID, Customer, Phone..."
+          onkeyup="debouncedLoadOrders()">
+      </div>
+      <div class="filter-bar">
+        <button class="filter-btn active" onclick="filterOrders('all')">All</button>
+        <button class="filter-btn" onclick="filterOrders('pending')">Pending</button>
+        <button class="filter-btn" onclick="filterOrders('completed')">Completed</button>
+        <button class="filter-btn" onclick="filterOrders('canceled')">Canceled</button>
+        <button class="filter-btn" style="border-color:#ffc107; color:#856404;" onclick="filterOrders('refunds')">⚠️
+          Refunds</button>
+      </div>
+      <table id="orders-table">
+        <thead>
+          <tr>
+            <th style="width: 200px;">ID / Date</th>
+            <th style="width: 20%;">Customer Details</th>
+            <th style="width: 25%;">Items Ordered</th>
+            <th>Total</th>
+            <th>Status / Delete</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="pagination-controls" id="orders-pagination"></div>
+    </div>
+    <!-- PRODUCTS -->
+    <div id="products" class="section">
+      <div class="header">
+        <h1>Products</h1>
+        <button class="btn btn-primary" onclick="openProductModal()">+ Add Product</button>
+      </div>
+      <div class="search-bar">
+        <input type="text" class="search-input" id="search-products" placeholder="Search Products..."
+          onkeyup="debouncedLoadProducts()">
+      </div>
+      <table id="products-table">
+        <thead>
+          <tr>
+            <th>Image</th>
+            <th>Name</th>
+            <th>Price</th>
+            <th>Stock</th>
+            <th>Category</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="pagination-controls" id="products-pagination"></div>
+    </div>
+    <!-- USERS -->
+    <div id="users" class="section">
+      <div class="header">
+        <h1>Registered Users</h1>
+      </div>
+      <div class="search-bar">
+        <input type="text" class="search-input" id="search-users" placeholder="Search Name, Email, Username..."
+          onkeyup="debouncedLoadUsers()">
+      </div>
+      <table id="users-table">
+        <thead>
+          <tr>
+            <th>Name / Last Login</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Phone</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="pagination-controls" id="users-pagination"></div>
+    </div>
+    <!-- MESSAGES -->
+    <div id="messages" class="section">
+      <div class="header">
+        <h1>Messages & Quotes</h1>
+      </div>
+      <div style="background:white; padding:20px; border-radius:10px;">
+        <div class="search-bar">
+          <input type="text" class="search-input" id="search-messages" placeholder="Search Messages & Quotes..."
+            onkeyup="debouncedLoadMessages()">
+        </div>
+        <h3>Contact Messages</h3>
+        <table id="messages-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Email / Phone</th>
+              <th>Subject / Message</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <br>
+        <h3>Quote Requests</h3>
+        <table id="quotes-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Name</th>
+              <th>Email / Phone</th>
+              <th>Request Details</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="pagination-controls" id="messages-pagination"></div>
+      </div>
+    </div>
+    <!-- ISP MANAGER -->
+    <div id="wifi" class="section">
+      <div class="header">
+        <h1>ISP Manager</h1>
+        <div style="display:flex; gap:10px;">
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-primary" onclick="loadWifiSessions()"><i class="fas fa-sync"></i>
+              Refresh</button>
+          </div>
+        </div>
+      </div>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-val" id="wifi-active">0</div>
+          <div class="stat-label">Active Hotspot Users</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-val" id="wifi-revenue" style="color:#28a745;">0</div>
+          <div class="stat-label">WiFi Revenue (KES)</div>
+        </div>
+      </div>
+      <div style="background:white; padding:20px; border-radius:10px; margin-bottom:20px;">
+        <h3>Generate Voucher</h3>
+        <div style="display:flex; gap:10px; align-items:flex-end;">
+          <div>
+            <label style="display:block; margin-bottom:5px;">Duration (Hours)</label>
+            <input type="number" id="voucher-hours" class="form-input" value="1" min="1" style="width:100px;">
+          </div>
+          <button class="btn btn-primary" onclick="generateVoucher()">Generate Code</button>
+        </div>
+        <div id="generated-voucher-display" style="margin-top:15px; font-size:1.5rem; font-weight:bold; color:#03208f;">
+        </div>
+      </div>
+      <div style="background:white; padding:20px; border-radius:10px;">
+        <h3>Recent Sessions / Vouchers</h3>
+        <table id="wifi-table">
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>Type</th>
+              <th>Code / Phone</th>
+              <th>Status</th>
+              <th>Expiry</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+  <!-- Product Modal -->
+  <div id="productModal" class="modal">
+    <div class="modal-content">
+      <h2 id="modalTitle">Add New Product</h2>
+      <form onsubmit="saveProduct(event)">
+        <input type="hidden" name="id" id="prodId">
+        <div class="form-group">
+          <label>Name</label>
+          <input class="form-input" name="name" id="prodName" required>
+        </div>
+        <div class="form-group" style="display:flex; gap:10px;">
+          <div style="flex:1;">
+            <label>Price (KES)</label>
+            <input class="form-input" type="number" name="price" id="prodPrice" required>
+          </div>
+          <div style="flex:1;">
+            <label>Stock Qty</label>
+            <input class="form-input" type="number" name="stock" id="prodStock" placeholder="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Product Image</label>
+          <div class="image-mode-toggle">
+            <button type="button" class="active" onclick="setImageMode('upload')">Upload Image</button>
+            <button type="button" onclick="setImageMode('url')">Image URL</button>
+          </div>
+          <img id="imagePreview" class="image-preview" alt="Image preview">
+          <div id="uploadMode" class="image-upload-container">
+            <div class="upload-btn-wrapper">
+              <label class="upload-btn" for="imageFileInput">📷 Choose Image File</label>
+              <input type="file" id="imageFileInput" accept="image/*" onchange="handleImageUpload(event)">
+            </div>
+            <small style="color: var(--text-gray);">Supports: JPG, PNG, GIF, WebP</small>
+          </div>
+          <div id="urlMode" style="display:none;">
+            <input class="form-input" type="url" id="prodImageUrl" placeholder="https://example.com/image.jpg">
+            <button type="button" class="btn btn-primary" style="margin-top:5px; width:100%;"
+              onclick="previewImageUrl()">Preview URL</button>
+          </div>
+          <input type="hidden" name="image" id="prodImage">
+        </div>
+        <div class="form-group">
+          <label>Description / Details</label>
+          <textarea class="form-input" name="description" id="prodDesc" rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label>Category</label>
+          <select class="form-input" name="category" id="prodCategory">
+            <option>Router</option>
+            <option>Switch</option>
+            <option>Rack</option>
+            <option>Cables</option>
+            <option>General</option>
+          </select>
+        </div>
+        <button type="submit" class="btn btn-primary" style="width:100%">Save Product</button>
+        <button type="button" class="btn" style="width:100%; margin-top:10px; background:#ddd;"
+          onclick="closeProductModal()">Cancel</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // --- UTILS ---
+    function debounce(func, wait) {
+      let timeout;
+      return function (...args) {
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(this, args), wait);
+      };
+    }
+
+    function renderPagination(meta, containerId, fetchFnName) {
+      const container = document.getElementById(containerId);
+      if (!container) return;
+      if (!meta || !meta.pages || meta.pages <= 1) { container.innerHTML = ''; return; } const prevDisabled = !meta.has_prev
+        ? 'disabled' : ''; const nextDisabled = !meta.has_next ? 'disabled' : ''; container.innerHTML = ` <button
+    class="page-btn" ${prevDisabled} onclick="${fetchFnName}(${meta.page - 1})">Previous</button>
+    <span style="font-size:14px; color:#666;">Page ${meta.page} of ${meta.pages}</span>
+    <button class="page-btn" ${nextDisabled} onclick="${fetchFnName}(${meta.page + 1})">Next</button>
+    `;
+    }
+
+    const debouncedLoadOrders = debounce(() => loadOrders(1), 500);
+    const debouncedLoadProducts = debounce(() => loadProducts(1), 500);
+    const debouncedLoadUsers = debounce(() => loadUsers(1), 500);
+    const debouncedLoadMessages = debounce(() => loadMessages(1), 500);
+
+    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    if (!token) {
+      window.location.href = 'login.html';
+    }
+
+    async function checkSession() {
+      try {
+        const res = await fetch(`${window.API_URL}/auto-login`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ token: token })
+        });
+        if (!res.ok) {
+          throw new Error(`Session Invalid (${res.status})`);
+        }
+        const data = await res.json();
+        const role = data.user.role;
+        if (role !== 'admin' && role !== 'super_admin') {
+          throw new Error("Unauthorized Access: User is not an admin.");
+        }
+        if (localStorage.getItem('token')) localStorage.setItem('user_role', role);
+        else sessionStorage.setItem('user_role', role);
+
+        applyRBAC(role);
+        document.body.style.visibility = 'visible';
+      } catch (e) {
+        console.error("Session check failed", e);
+      }
+    }
+
+    async function fetchAuth(url, options = {}) {
+      const headers = options.headers || {};
+      headers['Authorization'] = token;
+      if (options.body && !headers['Content-Type']) {
+        headers['Content-Type'] = 'application/json';
+      }
+      const res = await fetch(url, { ...options, headers });
+      if (res.status === 401 || res.status === 403) {
+        alert("Session expired or unauthorized.");
+        logout();
+        throw new Error("Unauthorized");
+      }
+      return res;
+    }
+
+    async function performApiCall(url, method, successMsg, data = null) {
+      try {
+        const options = { method, headers: {} };
+        if (data) options.body = JSON.stringify(data);
+        const res = await fetchAuth(`${window.API_URL}${url}`, options);
+        const json = await res.json();
+        if (json.success) {
+          if (successMsg) {
+            if (window.showToast) window.showToast(successMsg, 'success');
+            else alert(successMsg);
+          }
+          return json;
+        } else {
+          throw new Error(json.error || 'Operation failed');
+        }
+      } catch (e) {
+        if (window.showToast) window.showToast(e.message, 'error');
+        else alert(e.message);
+        throw e;
+      }
+    }
+
+    function showSection(id, navItem) {
+      document.querySelectorAll('.section').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.nav-link').forEach(el => el.classList.remove('active'));
+      document.getElementById(id).classList.add('active');
+      if (navItem) navItem.classList.add('active');
+      if (id === 'dashboard') loadStats();
+      if (id === 'orders') loadOrders();
+      if (id === 'products') loadProducts();
+      if (id === 'users') loadUsers();
+      if (id === 'messages') loadMessages();
+      if (id === 'wifi') { refreshWifiManager(); }
+    }
+
+    async function refreshWifiManager(btn = null) {
+      loadWifiStats();
+      loadWifiSessions();
+    }
+
+    async function loadWifiStats() {
+      try {
+        const res = await fetchAuth(`${window.API_URL}/admin/wifi-stats`);
+        const json = await res.json();
+        if (json.success) {
+          document.getElementById('wifi-active').innerText = json.active_users;
+          if (json.total_revenue !== null) {
+            document.getElementById('wifi-revenue').innerText = json.total_revenue.toLocaleString();
+          } else {
+            document.getElementById('wifi-revenue').innerText = "🔒 Restricted";
+            document.getElementById('wifi-revenue').style.color = "#6c757d"; // Grey out
+          }
+        }
+      } catch (e) { }
+    }
+
+    async function loadWifiSessions() {
+      try {
+        const res = await fetchAuth(`${window.API_URL}/admin/wifi-sessions`);
+        const json = await res.json();
+        const tbody = document.querySelector('#wifi-table tbody');
+        tbody.innerHTML = '';
+        const role = (localStorage.getItem('user_role') || sessionStorage.getItem('user_role') || '').trim().toLowerCase();
+        const isSuper = role === 'super_admin';
+
+        if (json.success && json.data) {
+          const now = new Date();
+          json.data.forEach(s => {
+            let type = s.type === 'voucher' ? 'Voucher' : 'M-Pesa';
+            let identifier = s.type === 'voucher' ? s.code : (s.phone || s.mpesa_code);
+            let expiryDate = s.expiry_time ? new Date(s.expiry_time) : null;
+            let expiryStr = expiryDate ? expiryDate.toLocaleString() : '-';
+            let status = s.status;
+            let statusClass = '';
+
+            if (expiryDate && expiryDate < now) { status = 'Expired'; statusClass = 'status-canceled'; } else if
+              (status === 'active') { status = 'Active'; statusClass = 'status-completed'; } else if (status === 'pending_payment') { status = 'Pending Payment'; statusClass = 'status-pending'; } let deleteBtn = isSuper ? `<button
+      data-action="deleteWifiSession" data-id="${s._id}" class="btn btn-sm btn-danger"
+      style="margin-left:10px; padding:2px 6px;">✕</button>` : '';
+
+            const row = `<tr>
+        <td>${new Date(s.created_at).toLocaleDateString()}</td>
+        <td>${type}</td>
+        <td>${identifier}</td>
+        <td><span class="status-select ${statusClass}" style="padding:2px 8px;">${status}</span></td>
+        <td>${expiryStr}</td>
+        <td>${deleteBtn || '<span style="color:#ccc">-</span>'}</td>
+      </tr>`;
+            tbody.innerHTML += row;
+          });
+        }
+      } catch (e) { console.error("Wifi Load Error:", e); }
+    }
+
+    async function generateVoucher() {
+      const hours = document.getElementById('voucher-hours').value;
+      try {
+        const res = await fetchAuth(`${window.API_URL}/admin/generate-voucher`, {
+          method: 'POST',
+          body: JSON.stringify({ hours })
+        });
+        const json = await res.json();
+        if (json.success) {
+          document.getElementById('generated-voucher-display').innerText = json.code;
+          alert(`Voucher Created: ${json.code}`);
+          loadWifiSessions();
+        }
+      } catch (e) { alert("Failed to create voucher"); }
+    };
+
+    async function loadStats() {
+      const res = await performApiCall('/admin/stats', 'GET');
+      if (res && res.success) {
+
+        // Handle Restricted vs Value
+        const setVal = (elmId, val) => {
+          const elm = document.getElementById(elmId);
+          if (val !== null && val !== undefined) {
+            elm.innerText = val.toLocaleString();
+            elm.style.color = '';
+          } else {
+            elm.innerText = "🔒 Restricted";
+            elm.style.color = "#6c757d";
+          }
+        };
+
+        setVal('total-revenue', res.revenue);
+        setVal('pending-revenue', res.pending_revenue);
+
+        document.getElementById('active-wifi').innerText = res.active_wifi || 0;
+        document.getElementById('total-users').innerText = res.users || 0;
+      }
+      loadCharts();
+    }
+
+    let revenueChartInstance = null;
+    let statusChartInstance = null;
+    let chartLoadRetries = 0;
+
+    async function loadCharts() {
+      // Wait for Chart.js to load if not ready yet (max 50 retries = 5 seconds)
+      if (typeof Chart === 'undefined') {
+        chartLoadRetries++;
+        if (chartLoadRetries > 50) {
+          return; // Chart.js failed to load
+        }
+        setTimeout(loadCharts, 100);
+        return;
+      }
+
+      chartLoadRetries = 0; // Reset counter
+
+      try {
+        const res = await performApiCall('/admin/stats/charts', 'GET');
+        if (res && res.success) {
+          renderRevenueChart(res.revenue_trend);
+          renderStatusChart(res.status_distribution);
+        }
+      } catch (e) { console.error("Chart Error", e); }
+    }
+
+    function renderRevenueChart(data) {
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        console.warn('No revenue data to display');
+        return;
+      }
+
+      try {
+        const ctx = document.getElementById('revenueChart');
+        if (!ctx) {
+          console.error('Revenue chart canvas not found');
+          return;
+        }
+
+        const labels = data.map(d => d.date);
+        const values = data.map(d => d.total);
+
+        if (revenueChartInstance) revenueChartInstance.destroy();
+
+        revenueChartInstance = new Chart(ctx, {
+          type: 'line',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: 'Revenue (KES)',
+              data: values,
+              borderColor: '#03208f',
+              backgroundColor: 'rgba(3, 32, 143, 0.1)',
+              tension: 0.4,
+              fill: true
+            }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+      } catch (error) {
+        console.error('Error rendering revenue chart:', error);
+      }
+    }
+
+    function renderStatusChart(data) {
+      if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
+        console.warn('No status data to display');
+        return;
+      }
+
+      try {
+        const ctx = document.getElementById('statusChart');
+        if (!ctx) {
+          console.error('Status chart canvas not found');
+          return;
+        }
+
+        const labels = Object.keys(data);
+        const values = Object.values(data);
+
+        // Colors mapping
+        const colors = {
+          'pending': '#ffc107',
+          'processing': '#17a2b8',
+          'completed': '#28a745',
+          'canceled': '#dc3545',
+          'refunded': '#6c757d',
+          'refund_requested': '#fd7e14'
+        };
+        const bgColors = labels.map(l => colors[l] || '#666');
+
+        if (statusChartInstance) statusChartInstance.destroy();
+
+        statusChartInstance = new Chart(ctx, {
+          type: 'doughnut',
+          data: {
+            labels: labels,
+            datasets: [{
+              data: values,
+              backgroundColor: bgColors
+            }]
+          },
+          options: { responsive: true, maintainAspectRatio: false }
+        });
+      } catch (error) {
+        console.error('Error rendering status chart:', error);
+      }
+    }
+
+    function escapeHtml(unsafe) {
+      if (unsafe === undefined || unsafe === null) return "";
+      return String(unsafe)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+
+    async function loadOrders(page = 1) {
+      if (typeof page !== 'number' || page < 1) page = 1; const tbody = document.querySelector('#orders-table tbody'); const
+        search = document.getElementById('search-orders').value;
+      tbody.innerHTML = '<tr><td colspan="6">Loading...</td></tr>'; try {
+        const res = await
+          fetchAuth(`${window.API_URL}/orders?page=${page}&search=${encodeURIComponent(search)}`); const json = await
+            res.json(); if (json.success) {
+              let items = json.data.items || json.data; window.allOrders = items;
+              renderOrders(items); if (json.data.total) renderPagination(json.data, 'orders-pagination', 'loadOrders');
+            }
+        else { tbody.innerHTML = '<tr><td colspan="6">Error loading orders</td></tr>'; }
+      } catch (e) {
+        tbody.innerHTML = '<tr><td colspan="6">Error loading</td></tr>';
+      }
+    } function renderOrders(orders) {
+      const
+        tbody = document.querySelector('#orders-table tbody'); tbody.innerHTML = ''; const rows = orders.map(o => {
+          const customer = o.customer || {};
+          const status = o.status || 'pending';
+          const paymentStatus = (o.payment && o.payment.status === 'paid') ? 'paid' : 'pending';
+
+          const paymentBadge = paymentStatus === 'paid'
+            ? `<span style="background:#28a745; color:white; padding:2px 6px; border-radius:4px; font-size:11px; margin-left:5px;">PAID</span>`
+            : `<span style="background:#ffc107; color:#856404; padding:2px 6px; border-radius:4px; font-size:11px; margin-left:5px;">UNPAID</span>`;
+
+          let statusControl = '';
+          if (status === 'refund_requested') {
+            statusControl = `
+        <div class="btn-action-group">
+          <button class="btn btn-sm" style="background:#28a745; color:white;" data-action="refundApprove"
+            data-id="${o.order_id}">✔ Accept</button>
+          <button class="btn btn-sm" style="background:#dc3545; color:white;" data-action="refundDecline"
+            data-id="${o.order_id}">✖ Reject</button>
+        </div>`;
+          } else {
+            statusControl = `
+        <div style="display:flex; align-items:center; gap:5px;">
+          <select data-action="updateStatus" data-id="${o.order_id}" style="padding:5px; border-radius:4px;">
+            <option value="pending" ${status === 'pending' ? 'selected' : ''}>Pending</option>
+            <option value="processing" ${status === 'processing' ? 'selected' : ''}>Processing</option>
+            <option value="completed" ${status === 'completed' ? 'selected' : ''}>Completed</option>
+            <option value="canceled" ${status === 'canceled' ? 'selected' : ''}>Canceled</option>
+          </select>
+        </div>
+        `;
+            if (status === 'refunded') statusControl = `<span style="color:orange">Refunded</span>`;
+          }
+
+          // Only super_admin can delete orders
+          const userRole = (localStorage.getItem('user_role') || sessionStorage.getItem('user_role') || '').toLowerCase();
+          const deleteBtn = userRole === 'super_admin'
+            ? `<button class="btn btn-sm btn-danger" data-action="deleteOrder" data-id="${o.order_id}"
+            title="Delete Order">🗑️</button>`
+            : '';
+
+          const safeName = escapeHtml(customer.name);
+          const safePhone = escapeHtml(customer.phone);
+          const safeEmail = escapeHtml(customer.email);
+          const safeAddress = escapeHtml(customer.address || ''); // Added Address
+
+          let detailsHtml = '<ul style="font-size:0.85rem; padding-left:15px; margin:0;">';
+          (o.items || []).forEach(i => {
+            detailsHtml += `<li>${escapeHtml(i.name)} x${i.quantity}</li>`;
+          });
+          detailsHtml += '</ul>';
+
+          const emailBtn = customer.email ? `<a href="mailto:${safeEmail}?subject=Order ${o.order_id}"
+          class="btn btn-primary btn-sm" style="text-decoration:none; padding:4px 6px; margin-right:3px;"
+          title="Email">✉️</a>` : '';
+          const waBtn = customer.phone ? `<a href="https://wa.me/${customer.phone.replace(/[^0-9]/g, '')}" target="_blank"
+          class="btn btn-wa btn-sm" style="text-decoration:none; padding:4px 6px; margin-right:3px;"
+          title="WhatsApp">WA</a>` : '';
+          const smsBtn = customer.phone ? `<a href="sms:${safePhone}" class="btn btn-sms btn-sm"
+          style="text-decoration:none; padding:4px 6px; margin-right:3px;" title="SMS">SMS</a>` : '';
+          const receiptBtn = `<button data-action="openReceipt" data-id="${o.order_id}" class="btn btn-sm"
+          style="background:#6c757d; color:white; padding:4px 6px; margin-right:3px;" title="View Receipt">📄</button>`;
+
+          return `<tr>
+          <td>
+            <strong>#${o.order_id.substring(0, 8)}</strong><br>
+            <small>${new Date(o.created_at).toLocaleString()}</small><br>
+            ${paymentBadge}
+          </td>
+          <td>
+            <strong>${safeName}</strong><br>
+            <small>${safePhone}</small><br>
+            <small>${safeEmail}</small><br>
+            <small style="color:#666; font-style:italic;">📍 ${safeAddress || 'No Address'}</small>
+            <!-- Display Address -->
+          </td>
+          <td>${detailsHtml}</td>
+          <td><strong>KES ${o.total.toLocaleString()}</strong></td>
+          <td>
+            ${statusControl}
+            <div style="margin-top:5px;">${deleteBtn}</div>
+          </td>
+          <td>
+            <div class="btn-action-group">
+              ${receiptBtn}
+              ${emailBtn}
+              ${waBtn}
+              ${smsBtn}
+            </div>
+          </td>
+        </tr>`;
+        }).join('');
+      tbody.innerHTML = rows;
+    }
+
+    async function loadProducts(page = 1) {
+      if (typeof page !== 'number' || page < 1) page = 1; const tbody = document.querySelector('#products-table tbody');
+      const search = document.getElementById('search-products').value; try {
+        const res = await
+          fetchAuth(`${window.API_URL}/products?page=${page}&search=${encodeURIComponent(search)}`); const json = await
+            res.json(); const items = json.data.items || json.data; const meta = json.data.total !== undefined ? json.data :
+              null; tbody.innerHTML = ''; items.forEach(p => {
+                const pDataStr = JSON.stringify(p).replace(/"/g, '&quot;');
+                const row = `<tr>
+            <td><img src="${p.image.replace(/^img\//, 'assets/img/')}" height="40"
+                onerror="this.src='assets/img/pics/default.jpg'"></td>
+            <td>${p.name}</td>
+            <td>${p.price.toLocaleString()}</td>
+            <td>${p.stock || 0}</td> <!-- Display Stock -->
+            <td>${p.category}</td>
+            <td>
+              <button class="btn btn-primary btn-sm" data-action="openProductEdit"
+                data-product="${pDataStr}">Edit</button>
+              <button class="btn btn-danger btn-sm" data-action="deleteProduct" data-id="${p._id}">Delete</button>
+            </td>
+          </tr>`;
+                tbody.innerHTML += row;
+              });
+        if (meta) renderPagination(meta, 'products-pagination', 'loadProducts');
+      } catch (e) { console.error(e); }
+    }
+
+    async function loadUsers(page = 1) {
+      if (typeof page !== 'number' || page < 1) page = 1; const tbody = document.querySelector('#users-table tbody');
+      const search = document.getElementById('search-users').value;
+      tbody.innerHTML = '<tr><td colspan="7">Loading...</td></tr>'; try {
+        const res = await
+          fetchAuth(`${window.API_URL}/users?page=${page}&search=${encodeURIComponent(search)}`); const json = await
+            res.json(); if (json.success) {
+              tbody.innerHTML = ''; const
+                currentUserRole = (localStorage.getItem('user_role') || sessionStorage.getItem('user_role') || ''
+                ).trim().toLowerCase(); const isSuperAdmin = currentUserRole === 'super_admin'; const items = json.data.items ||
+                  json.data; const meta = json.data.total !== undefined ? json.data : null; items.forEach(u => {
+                    const isLoggedIn = u.token && u.token.length > 0;
+                    const statusBadge = isLoggedIn
+                      ? `<span style="background:#d4edda; color:#155724; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:600;">🟢 Online</span>`
+                      : `<span style="background:#f8f9fa; color:#6c757d; padding:3px 8px; border-radius:12px; font-size:11px; font-weight:600;">⚫ Offline</span>`;
+                    const lastLogin = u.last_login ? new Date(u.last_login).toLocaleString() : 'Never';
+                    let roleBadge = '';
+                    if (u.role === 'super_admin') roleBadge = `<span style="background:#dc3545; color:white; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">SUPER ADMIN</span>`;
+                    else if (u.role === 'admin' || u.role === 'staff') roleBadge = `<span style="background:#007bff; color:white; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">STAFF</span>`;
+                    else roleBadge = `<span style="background:#6c757d; color:white; padding:3px 8px; border-radius:4px; font-size:11px; font-weight:600;">USER</span>`;
+
+                    const fullName = (u.fname || '') + ' ' + (u.lname || '');
+                    const safeId = u._id;
+
+                    let actionButtons = '-';
+                    if (isSuperAdmin) {
+                      actionButtons = `<div style="display:flex; gap:5px; flex-wrap:wrap;">`;
+                      if (isLoggedIn) actionButtons += `<button class="btn btn-danger btn-sm" data-action="forceLogout"
+                data-id="${safeId}">🚪 Force Logout</button>`;
+                      // Prevent deleting self or other super admins
+                      if (u.role !== 'super_admin') actionButtons += `<button class="btn btn-sm"
+                style="background:#dc3545; color:white;" data-action="deleteUser" data-id="${safeId}">🗑️
+                Delete</button>`;
+                      actionButtons += `</div>`;
+                    }
+                    const row = `<tr>
+              <td>${escapeHtml(fullName)}<br><small style="color:#999;">${lastLogin}</small></td>
+              <td>${escapeHtml(u.username)}</td>
+              <td>${escapeHtml(u.email)}</td>
+              <td>${escapeHtml(u.phone || '-')}</td>
+              <td>${roleBadge}</td>
+              <td>${statusBadge}</td>
+              <td>${actionButtons}</td>
+            </tr>`;
+                    tbody.innerHTML += row;
+                  });
+              if (meta) renderPagination(meta, 'users-pagination', 'loadUsers');
+            } else {
+          tbody.innerHTML = `<tr>
+              <td colspan="7" style="color:red">Error: ${json.error || 'Unknown Backend Error'}</td>
+            </tr>`;
+        }
+      } catch (e) {
+        console.error(e);
+        tbody.innerHTML = `<tr>
+              <td colspan="7" style="color:red">JS Error: ${e.message}</td>
+            </tr>`;
+      }
+    }
+
+    async function loadMessages(page = 1) {
+      if (typeof page !== 'number' || page < 1) page = 1; const
+        search = document.getElementById('search-messages').value; const encodedSearch = encodeURIComponent(search);
+      try {
+        const [msgRes, quoteRes] = await Promise.all([
+          fetchAuth(`${window.API_URL}/messages?page=${page}&search=${encodedSearch}`),
+          fetchAuth(`${window.API_URL}/quotes?page=${page}&search=${encodedSearch}`)]); const msgsJson = await
+            msgRes.json(); const quotesJson = await quoteRes.json(); const msgs = msgsJson.data.items || msgsJson.data;
+        const msgMeta = msgsJson.data.total !== undefined ? msgsJson.data : null; const quotes = quotesJson.data.items
+          || quotesJson.data; const role = localStorage.getItem('user_role') || sessionStorage.getItem('user_role');
+        const isSuper = role === 'super_admin'; const msgBody = document.querySelector('#messages-table tbody');
+        msgBody.innerHTML = msgs.map(m => {
+          const date = new Date(m.created_at).toLocaleDateString();
+          const safeId = m._id;
+          const deleteBtn = isSuper ? `<button class="btn btn-sm"
+                style="background:red; color:white; margin-left:5px;" data-action="deleteMessage"
+                data-id="${safeId}">🗑️</button>` : '';
+
+          const safeName = escapeHtml(m.name);
+          const safeSubject = escapeHtml(m.subject || 'No Subject');
+          const safeMessage = escapeHtml(m.message);
+
+          const waBtn = m.phone ? `<a href="https://wa.me/${m.phone.replace(/[^0-9]/g, '')}" target="_blank"
+                class="btn btn-wa btn-sm" style="text-decoration:none;" title="WhatsApp">WA</a>` : '';
+          const smsBtn = m.phone ? `<a href="sms:${m.phone}" class="btn btn-sms btn-sm"
+                style="text-decoration:none;" title="SMS">SMS</a>` : '';
+
+          return `<tr>
+                <td>${date}</td>
+                <td>${safeName}</td>
+                <td>${escapeHtml(m.email)}<br><small>${escapeHtml(m.phone || 'No phone')}</small></td>
+                <td><b>${safeSubject}</b><br>${safeMessage}</td>
+                <td>
+                  <div class="btn-action-group">
+                    <a href="mailto:${m.email}?subject=Re: ${safeSubject}" class="btn btn-primary btn-sm"
+                      style="text-decoration:none;" title="Email">Email</a>
+                    ${waBtn}
+                    ${smsBtn}
+                    ${deleteBtn}
+                  </div>
+                </td>
+              </tr>`;
+        }).join('');
+
+        const quoteBody = document.querySelector('#quotes-table tbody');
+        quoteBody.innerHTML = quotes.map(q => {
+          const date = new Date(q.created_at).toLocaleDateString();
+          const deleteBtn = isSuper ? `<button class="btn btn-sm"
+                style="background:red; color:white; margin-left:5px;" data-action="deleteQuote"
+                data-id="${q._id}">🗑️</button>` : '';
+          const waBtn = q.phone ? `<a href="https://wa.me/${q.phone.replace(/[^0-9]/g, '')}" target="_blank"
+                class="btn btn-wa btn-sm" style="text-decoration:none;" title="WhatsApp">WA</a>` : '';
+          const smsBtn = q.phone ? `<a href="sms:${q.phone}" class="btn btn-sms btn-sm"
+                style="text-decoration:none;" title="SMS">SMS</a>` : '';
+
+          return `<tr>
+                <td>${date}</td>
+                <td>${escapeHtml(q.name)}</td>
+                <td>${escapeHtml(q.email)}<br><small>${escapeHtml(q.phone || 'No phone')}</small></td>
+                <td>${escapeHtml(q.details)}</td>
+                <td>
+                  <div class="btn-action-group">
+                    <a href="mailto:${q.email}?subject=Re: Quote Request" class="btn btn-primary btn-sm"
+                      style="text-decoration:none;" title="Email">Email</a>
+                    ${waBtn}
+                    ${smsBtn}
+                    ${deleteBtn}
+                  </div>
+                </td>
+              </tr>`;
+        }).join('');
+
+        if (msgMeta) renderPagination(msgMeta, 'messages-pagination', 'loadMessages');
+      } catch (e) { console.error(e); }
+    }
+
+    function filterOrders(status) {
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      event.target.classList.add('active'); // Works if called from inline onclick
+
+      if (status === 'all') {
+        renderOrders(window.allOrders);
+      } else if (status === 'refunds') {
+        renderOrders(window.allOrders.filter(o => o.status === 'refund_requested' || o.status === 'refunded'));
+      } else {
+        renderOrders(window.allOrders.filter(o => (o.status || 'pending') === status));
+      }
+    }
+
+    async function logout() {
+      try {
+        await fetch(`${window.API_URL}/logout`, {
+          method: 'POST',
+          headers: { 'Authorization': token }
+        });
+      } catch (e) { }
+      localStorage.clear();
+      sessionStorage.clear();
+      window.location.href = 'login.html';
+    };
+
+    function applyRBAC(role) {
+      if (role !== 'super_admin') {
+        const usersLink = document.querySelector('.nav-link[onclick*="users"]');
+        if (usersLink) usersLink.style.display = 'none';
+        const userCard = document.querySelectorAll('.stat-card')[3];
+        if (userCard) userCard.style.display = 'none';
+      }
+    };
+
+    function setImageMode(mode) {
+      currentImageMode = mode;
+      const uploadMode = document.getElementById('uploadMode');
+      const urlMode = document.getElementById('urlMode');
+      const buttons = document.querySelectorAll('.image-mode-toggle button');
+      buttons.forEach(btn => btn.classList.remove('active'));
+      if (mode === 'upload') {
+        uploadMode.style.display = 'block';
+        urlMode.style.display = 'none';
+        buttons[0].classList.add('active');
+      } else {
+        uploadMode.style.display = 'none';
+        urlMode.style.display = 'block';
+        buttons[1].classList.add('active');
+      }
+    };
+
+    function handleImageUpload(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+      if (!file.type.startsWith('image/')) return window.showToast('Invalid image file', 'error');
+      if (file.size > 5 * 1024 * 1024) return window.showToast('Image too large (>5MB)', 'error');
+      const reader = new FileReader();
+      reader.onload = function (e) {
+        document.getElementById('imagePreview').src = e.target.result;
+        document.getElementById('imagePreview').classList.add('show');
+        document.getElementById('prodImage').value = e.target.result;
+      };
+      reader.readAsDataURL(file);
+    };
+
+    function previewImageUrl() {
+      const url = document.getElementById('prodImageUrl').value;
+      if (!url) return window.showToast('Please enter a valid URL', 'warning');
+      document.getElementById('imagePreview').src = url;
+      document.getElementById('imagePreview').classList.add('show');
+      document.getElementById('prodImage').value = url;
+    };
+
+    function openProductModal(product = null) {
+      const modal = document.getElementById('productModal');
+      const title = document.getElementById('modalTitle');
+      modal.style.display = 'flex';
+      if (product) {
+        title.innerText = 'Edit Product';
+        document.getElementById('prodId').value = product._id;
+        document.getElementById('prodName').value = product.name;
+        document.getElementById('prodPrice').value = product.price;
+        document.getElementById('prodStock').value = product.stock || 0; // Populate Stock
+        document.getElementById('prodDesc').value = product.description;
+        document.getElementById('prodCategory').value = product.category;
+        document.getElementById('imagePreview').src = product.image.replace(/^img\//, 'assets/img/');
+        document.getElementById('imagePreview').classList.add('show');
+        document.getElementById('prodImage').value = product.image;
+      } else {
+        title.innerText = 'Add New Product';
+        document.querySelector('form').reset();
+        document.getElementById('prodId').value = '';
+        document.getElementById('prodStock').value = 0; // Default Stock
+        document.getElementById('imagePreview').src = '';
+        document.getElementById('imagePreview').classList.remove('show');
+      }
+    };
+
+    function closeProductModal() {
+      document.getElementById('productModal').style.display = 'none';
+    };
+
+    async function saveProduct(e) {
+      e.preventDefault();
+      const id = document.getElementById('prodId').value;
+      const formData = new FormData(e.target);
+      const data = Object.fromEntries(formData.entries());
+      const method = id ? 'PUT' : 'POST';
+      const url = id ? `/products/${id}` : '/products';
+      try {
+        await performApiCall(url, method, 'Product Saved', data);
+        closeProductModal();
+        loadProducts();
+      } catch (err) { window.showToast(err.message, 'error'); }
+    };
+
+    // --- INIT ---
+    checkSession().then(() => {
+      loadStats();
+    });
+  </script>
+</body>
+
+</html>

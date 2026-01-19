@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Debugger</title>
+  <style>
+    body {
+      font-family: monospace;
+      padding: 20px;
+      background: #222;
+      color: #0f0;
+    }
+
+    .log-line {
+      margin: 5px 0;
+      border-bottom: 1px solid #333;
+      padding: 2px;
+    }
+
+    .error {
+      color: #ff5555;
+    }
+
+    .success {
+      color: #55ff55;
+    }
+
+    .btn {
+      padding: 10px;
+      background: #444;
+      color: white;
+      border: none;
+      cursor: pointer;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+
+<body>
+  <h1>System Diagnosis Tool</h1>
+  <p>Please wait, running tests...</p>
+  <div id="logs"></div>
+  <button class="btn" onclick="runTests()">Rerun Tests</button>
+  <button class="btn" style="background:red" onclick="clearAuth()">Clear Login Data</button>
+  <script src="assets/js/site-api.js"></script>
+  <script>
+    // const API_URL = "http://127.0.0.1:5000";
+    const API_URL = window.API_URL;
+    const LOGS = document.getElementById('logs');
+    function log(msg, type = 'info') {
+      const div = document.createElement('div');
+      div.className = 'log-line ' + type;
+      div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+      LOGS.appendChild(div);
+    }
+    function clearAuth() {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user_role');
+      localStorage.removeItem('user_name');
+      log('Local Storage Cleared.', 'warning');
+      alert('Auth data cleared. Try logging in again.');
+    }
+    async function runTests() {
+      LOGS.innerHTML = ''; // match
+      log("Test started...");
+      // 1. Check Auth Token
+      const token = localStorage.getItem('token');
+      const role = localStorage.getItem('user_role');
+      if (!token) {
+        log("❌ No Auth Token found. Please Login first.", 'error');
+        return;
+      } else {
+        log(`✅ Auth Token found. (Length: ${token.length})`, 'success');
+      }
+      log(`ℹ️ User Role: ${role}`);
+      // 2. Check Server Connectivity (Ping)
+      try {
+        log(`Attempting to connect to ${API_URL}/admin/stats...`);
+        const start = Date.now();
+        const res = await fetch(`${API_URL}/admin/stats`);
+        const duration = Date.now() - start;
+        log(`✅ Server responded in ${duration}ms`, 'success');
+        log(`HTTP Status: ${res.status}`);
+        if (res.status === 200) {
+          const json = await res.json();
+          if (json.success) {
+            log(`✅ Data received successfully!`, 'success');
+            log(`Revenue: ${json.stats.revenue}, Orders: ${json.stats.orders}`);
+          } else {
+            log(`❌ Server returned error: ${json.error}`, 'error');
+          }
+        } else {
+          log(`❌ Unexpected HTTP Status: ${res.status}`, 'error');
+        }
+      } catch (e) {
+        log(`❌ CONNECTION FAILED: ${e.message}`, 'error');
+        log(`Is the python server running? Is CORS enabled?`, 'error');
+      }
+    }
+    // Auto run
+    runTests();
+  </script>
+</body>
+
+</html>

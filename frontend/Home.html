@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Home - Tindi Tech</title>
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    /* 
+      All styles have been moved to css pracs.css for the Premium Design System.
+      This ensures consistency across the website.
+    */
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <div class="logo">
+      <a href="Home.html"> <img src="assets/img/logo.png" alt="Tindi Tech" /></a>
+    </div>
+    <nav id="navbar">
+      <a href="Home.html">Home</a>
+      <a href="Shop.html">Shop</a>
+      <a href="About.html">About</a>
+      <a href="Contact.html">Contact</a>
+      <a href="Services.html">Services</a>
+      <a href="login.html" class="nav-login-link">Login/Register</a>
+    </nav>
+    <div class="nav-icons">
+
+
+      <!-- LINK TO THE CART PAGE -->
+      <a href="cart.html" style="position: relative;">
+        <img src="assets/img/pics/cart.jpg" class="nav-icon" alt="Cart">
+        <span id="cart-count" class="cart-count-badge">0</span>
+      </a>
+    </div>
+  </header>
+
+  <!-- HERO SECTION (Premium Design) -->
+  <section class="hero-section">
+    <video autoplay muted loop playsinline preload="auto" class="hero-bg-video">
+      <source src="assets/videos/home%20gdvid1.mp4" type="video/mp4">
+    </video>
+
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+      <h1>Networking Solutions for<br> the Modern Business </h1>
+      <p>
+        Tindi Tech provides enterprise-grade networking equipment and IT services to<br>
+        keep your business connected and secure.
+      </p>
+
+      <div style="margin-top: 30px;">
+        <a href="Shop.html" class="btn btn-primary">Browse Products</a>
+        <a href="quote.html" class="btn btn-outline" style="margin-left: 15px;">Get a
+          Quote</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- ABOUT SECTION -->
+  <div class="section-padding">
+    <div class="container">
+      <div style="display: flex; flex-wrap: wrap; align-items: center; gap: 40px;">
+        <div style="flex: 1; min-width: 300px;">
+          <h2 class="text-primary">Empowering Your Digital Future</h2>
+          <p class="text-muted" style="font-size: 1.1em; line-height: 1.8;">
+            At Tindi Tech, we don't just connect devices; we connect people to opportunities.
+            As a leading Internet Service Provider and IT Solutions consultancy, we are dedicated
+            to delivering robust, high-speed connectivity and cutting-edge infrastructure to homes and businesses.
+          </p>
+          <ul style="margin: 20px 0; font-size: 1.1em; color: #555;">
+            <li style="margin-bottom: 15px;"><i class="fas fa-check-circle text-primary"></i> Premium Fiber & Wireless
+              Internet</li>
+            <li style="margin-bottom: 15px;"><i class="fas fa-check-circle text-primary"></i> Enterprise Network Design
+            </li>
+            <li style="margin-bottom: 15px;"><i class="fas fa-check-circle text-primary"></i> Smart Security &
+              Automation</li>
+          </ul>
+          <a href="About.html" class="btn btn-primary" style="margin-top: 10px;">Learn More About Us</a>
+        </div>
+        <div style="flex: 1; min-width: 300px; text-align: center;">
+          <!-- Abstract Tech Visual using FontAwesome -->
+          <i class="fas fa-network-wired" style="font-size: 15rem; color: rgba(0, 51, 204, 0.1);"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SERVICES SECTION -->
+  <div class="section-padding bg-off-white">
+    <div class="container">
+      <h2 class="section-title">Our Solutions</h2>
+
+      <div class="services-grid">
+        <!-- Service 1 -->
+        <div class="service-card text-center">
+          <div class="service-icon"><i class="fas fa-wifi"></i></div>
+          <h3>ISP Services</h3>
+          <p>Unlimited high-speed internet packages tailored for streaming, gaming, and business productivity.</p>
+        </div>
+
+        <!-- Service 2 -->
+        <div class="service-card text-center">
+          <div class="service-icon"><i class="fas fa-server"></i></div>
+          <h3>Network Infrastructure</h3>
+          <p>Seamless LAN/WAN installation, structured cabling, and server management for enterprise stability.</p>
+        </div>
+
+        <!-- Service 3 -->
+        <div class="service-card text-center">
+          <div class="service-icon"><i class="fas fa-shield-halved"></i></div>
+          <h3>Security & CCTV</h3>
+          <p>Advanced surveillance systems and biometric access control to safeguard your assets 24/7.</p>
+        </div>
+      </div>
+
+      <div class="text-center" style="margin-top: 40px;">
+        <a href="Services.html" class="btn btn-outline"
+          style="color: var(--primary-color); border-color: var(--primary-color);">View All Services</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- WHY CHOOSE US -->
+  <div class="section-padding" style="background: linear-gradient(135deg, #0f0c29, #302b63); color: white;">
+    <div class="container text-center">
+      <h2 class="text-white" style="margin-bottom: 50px;">Why Choose Tindi Tech?</h2>
+
+      <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 50px;">
+        <!-- Feature 1 -->
+        <div style="flex: 1; min-width: 250px;">
+          <i class="fas fa-bolt" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 20px;"></i>
+          <h3 class="text-white">Gigabit Speeds</h3>
+          <p class="text-white-opacity">Ultra-low latency connection optimized for modern bandwidth demands.</p>
+        </div>
+
+        <!-- Feature 2 -->
+        <div style="flex: 1; min-width: 250px;">
+          <i class="fas fa-headset" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 20px;"></i>
+          <h3 class="text-white">24/7 Expert Support</h3>
+          <p class="text-white-opacity">Our dedicated technical team is always available to ensure you stay online.</p>
+        </div>
+
+        <!-- Feature 3 -->
+        <div style="flex: 1; min-width: 250px;">
+          <i class="fas fa-thumbs-up" style="font-size: 3rem; color: var(--accent-color); margin-bottom: 20px;"></i>
+          <h3 class="text-white">99.9% Reliability</h3>
+          <p class="text-white-opacity">Redundant infrastructure ensuring your business operations never stop.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CTA SECTION -->
+  <div class="section-padding bg-gradient-primary text-center">
+    <div class="container">
+      <h2 class="text-white" style="margin-bottom: 20px;">Get in touch</h2>
+      <p class="text-white-opacity" style="max-width: 700px; margin: 0 auto 30px;">
+        Tindi Tech specializes in all major IT solutions. We handle your business operations at your comfort.
+        Contact our team today for a customized quote.
+      </p>
+      <a href="quote.html" class="btn btn-outline">Get a Quote</a>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer>
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-column">
+          <h3>Tindi Tech</h3>
+          <p style="color: #ccc;">Providing innovative networking solutions,<br>
+            IT solutions and services to businesses worldwide.</p>
+        </div>
+
+        <div class="footer-column">
+          <h3>Quick Links</h3>
+          <a href="Home.html">Home</a>
+          <a href="Shop.html">Shop</a>
+          <a href="About.html">About</a>
+          <a href="Contact.html">Contact</a>
+          <a href="Services.html">Services</a>
+          <a href="quote.html">Quote</a>
+        </div>
+
+        <div class="footer-column">
+          <h3>Contact Us</h3>
+          <p style="color: #ccc;">00100, NAIROBI</p>
+          <p style="color: #ccc;">Email: tinditechnologies@gmail.com</p>
+          <p style="color: #ccc;">Phone: (01)10 725 884</p>
+        </div>
+
+        <div class="footer-column">
+          <h3>Follow Us</h3>
+          <div class="social-links">
+            <a href="https://x.com/WizzyAdams4" target="_blank"> <img src="assets/img/x%20image.png" alt="X"></a>
+            <a href="https://www.facebook.com/profile.php?id=100078814762212" target="_blank"><img
+                src="assets/img/facebook.jpeg" alt="FB"></a>
+            <a href="https://www.whatsapp.com/?lang=en" target="_blank"><img src="assets/img/whatsapp.jpeg" alt="WA">
+            </a>
+            <a href="https://www.tiktok.com/@njenga_05?lang=en" target="_blank"><img src="assets/img/tiktok.png"
+                alt="TikTok"></a>
+          </div>
+        </div>
+      </div>
+
+      <div class="copyright">
+        <p>&copy; 2025 Tindi Tech. All Rights Reserved.</p>
+        <p style="font-size: 0.85em; margin-top: 5px;">
+          <a href="#"
+            onclick="window.showToast ? window.showToast('Terms of Service coming soon!', 'info') : alert('Coming soon')"
+            style="color:#aaa; text-decoration:none;">Terms
+            of Service</a> |
+          <a href="#"
+            onclick="window.showToast ? window.showToast('Privacy Policy coming soon!', 'info') : alert('Coming soon')"
+            style="color:#aaa; text-decoration:none;">Privacy
+            Policy</a>
+        </p>
+      </div>
+    </div>
+  </footer>
+
+
+  <script src="assets/js/site-api.js"></script>
+  <script src="assets/js/auth.js"></script>
+</body>
+
+</html>

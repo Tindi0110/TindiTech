@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tindi Tech WiFi | Premium Hotspot</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        /* Specific Overrides for Portal to ensure it looks distinct and premium */
+        body {
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            color: white;
+        }
+
+        .portal-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            flex: 1;
+        }
+
+        .portal-header {
+            text-align: center;
+            margin-bottom: 40px;
+            padding-top: 20px;
+        }
+
+        .portal-header h1 {
+            font-size: 2.5rem;
+            background: linear-gradient(to right, #4facfe 0%, #00f2fe 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+        }
+
+        /* TABS */
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 30px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 50px;
+            padding: 5px;
+            display: inline-flex;
+            position: relative;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .tab-btn {
+            padding: 10px 30px;
+            border-radius: 40px;
+            border: none;
+            background: transparent;
+            color: rgba(255, 255, 255, 0.7);
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: #fff;
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+        }
+
+        /* GRID */
+        .plans-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+
+        .plan-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            transition: transform 0.3s ease, border-color 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            cursor: pointer;
+        }
+
+        .plan-card:hover {
+            transform: translateY(-5px);
+            border-color: #4facfe;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .plan-card.featured {
+            border: 1px solid #4facfe;
+            box-shadow: 0 0 20px rgba(79, 172, 254, 0.1);
+        }
+
+        .plan-tag {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: #ff4757;
+            color: white;
+            font-size: 0.7rem;
+            padding: 2px 8px;
+            border-radius: 10px;
+            font-weight: bold;
+        }
+
+        .plan-duration {
+            font-size: 1.2rem;
+            color: #ddd;
+            margin-bottom: 5px;
+        }
+
+        .plan-price {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 15px;
+        }
+
+        .plan-price span {
+            font-size: 1rem;
+            color: #aaa;
+        }
+
+        .features-list {
+            list-style: none;
+            padding: 0;
+            text-align: left;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+            color: #ccc;
+        }
+
+        .features-list li {
+            margin-bottom: 8px;
+        }
+
+        .features-list li i {
+            color: #00f2fe;
+            margin-right: 8px;
+        }
+
+        .btn-buy {
+            width: 100%;
+            padding: 12px;
+            border-radius: 10px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .plan-card:hover .btn-buy {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            box-shadow: 0 4px 15px rgba(0, 242, 254, 0.3);
+        }
+
+        /* LOGIN FORM */
+        .login-box {
+            max-width: 400px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 15px 15px 15px 45px;
+            background: rgba(0, 0, 0, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            color: white;
+            font-size: 1rem;
+        }
+
+        .input-group i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #aaa;
+        }
+
+        .btn-action {
+            background: linear-gradient(to right, #4facfe, #00f2fe);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            width: 100%;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        /* MODAL */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            backdrop-filter: blur(5px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .modal-content {
+            background: #1a1a2e;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            text-align: center;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 5px 15px;
+            border-radius: 20px;
+            background: rgba(0, 255, 0, 0.2);
+            color: #00ff00;
+            font-size: 0.9rem;
+            margin-bottom: 20px;
+        }
+
+        /* FOOTER */
+        .status-footer {
+            margin-top: 50px;
+            text-align: center;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        /* POPUP STYLES (MATCH CHECKOUT) */
+        .popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 2000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .popup-content {
+            background: #fff;
+            color: #333;
+            width: 90%;
+            max-width: 400px;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            position: relative;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .popup-close {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 24px;
+            cursor: pointer;
+            color: #999;
+        }
+
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #3498db;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+
+        @keyframes spin {
+            0% {
+                transform: rotate(0deg);
+            }
+
+            100% {
+                transform: rotate(360deg);
+            }
+        }
+
+        .icon-success {
+            font-size: 50px;
+            color: #28a745;
+            margin-bottom: 20px;
+        }
+
+        .icon-error {
+            font-size: 50px;
+            color: #dc3545;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="portal-container">
+        <div class="portal-header">
+            <h1>High Speed WiFi</h1>
+            <p>Select a package or login to continue</p>
+        </div>
+
+        <!-- NAVIGATION TABS -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('buy')">Buy Package</button>
+            <button class="tab-btn" onclick="switchTab('login')">Login</button>
+            <button class="tab-btn" onclick="switchTab('claim')">Support / Claim</button>
+        </div>
+
+        <!-- BUY SECTION -->
+        <div id="buy-section" class="section">
+            <div class="plans-grid">
+                <!-- 1 Hour -->
+                <div class="plan-card" onclick="selectPlan('1h', 20)">
+                    <div class="plan-duration">1 Hour</div>
+                    <div class="plan-price">KES 20 <span>/ device</span></div>
+                    <ul class="features-list">
+                        <li><i class="fas fa-bolt"></i> Unlimited Speed</li>
+                        <li><i class="fas fa-video"></i> HD Streaming</li>
+                        <li><i class="fas fa-check"></i> Instant Access</li>
+                    </ul>
+                    <button class="btn-buy">Select</button>
+                </div>
+
+                <!-- 3 Hours -->
+                <div class="plan-card" onclick="selectPlan('3h', 40)">
+                    <div class="plan-duration">3 Hours</div>
+                    <div class="plan-price">KES 40 <span>/ device</span></div>
+                    <ul class="features-list">
+                        <li><i class="fas fa-bolt"></i> Unlimited Speed</li>
+                        <li><i class="fas fa-video"></i> HD Streaming</li>
+                        <li><i class="fas fa-gamepad"></i> Gaming Ready</li>
+                    </ul>
+                    <button class="btn-buy">Select</button>
+                </div>
+
+                <!-- 12 Hours -->
+                <div class="plan-card featured" onclick="selectPlan('12h', 100)">
+                    <div class="plan-tag">POPULAR</div>
+                    <div class="plan-duration">12 Hours</div>
+                    <div class="plan-price">KES 100 <span>/ device</span></div>
+                    <ul class="features-list">
+                        <li><i class="fas fa-bolt"></i> Unlimited Speed</li>
+                        <li><i class="fas fa-video"></i> 4K Streaming</li>
+                        <li><i class="fas fa-moon"></i> All Night Access</li>
+                    </ul>
+                    <button class="btn-buy">Select</button>
+                </div>
+
+                <!-- 24 Hours -->
+                <div class="plan-card" onclick="selectPlan('24h', 150)">
+                    <div class="plan-duration">24 Hours</div>
+                    <div class="plan-price">KES 150 <span>/ device</span></div>
+                    <ul class="features-list">
+                        <li><i class="fas fa-calendar-day"></i> Full Day Access</li>
+                        <li><i class="fas fa-bolt"></i> Unlimited Data</li>
+                    </ul>
+                    <button class="btn-buy">Select</button>
+                </div>
+
+                <!-- 1 Week -->
+                <div class="plan-card" onclick="selectPlan('1w', 800)">
+                    <div class="plan-duration">7 Days</div>
+                    <div class="plan-price">KES 800 <span>/ device</span></div>
+                    <ul class="features-list">
+                        <li><i class="fas fa-calendar-week"></i> Weekly Pass</li>
+                        <li><i class="fas fa-save"></i> Save BIG</li>
+                    </ul>
+                    <button class="btn-buy">Select</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- LOGIN SECTION -->
+        <div id="login-section" class="section" style="display: none;">
+            <div class="glass-panel login-box">
+                <h2>Access Internet</h2>
+                <p style="margin-bottom: 20px; color: #aaa;">Enter your M-Pesa Code or Voucher</p>
+                <form id="loginForm">
+                    <div class="input-group">
+                        <i class="fas fa-key"></i>
+                        <input type="text" id="loginCode" name="code" placeholder="Example: QJD7..." required>
+                    </div>
+                    <button type="submit" class="btn-action">Connect</button>
+                </form>
+                <p style="margin-top: 20px; font-size: 0.8rem; color: #666;">
+                    Don't have a code? <a href="#" onclick="switchTab('buy')" style="color: #4facfe;">Buy a package</a>
+                </p>
+            </div>
+        </div>
+
+        <!-- CLAIM SECTION -->
+        <div id="claim-section" class="section" style="display: none;">
+            <div class="glass-panel login-box">
+                <h2><i class="fas fa-ambulance" style="color: #ff4757;"></i> Downtime Compensation</h2>
+                <p style="margin-bottom: 20px; color: #aaa;">Was the network down? Enter your active code to claim lost
+                    time.</p>
+                <form id="claimForm">
+                    <div class="input-group">
+                        <i class="fas fa-history"></i>
+                        <input type="text" id="claimCode" name="code" placeholder="Your Active Code" required>
+                    </div>
+                    <button type="submit" class="btn-action"
+                        style="background: linear-gradient(to right, #ff4757, #ff6b81);">Claim Voucher</button>
+                </form>
+                <div id="claimResult" style="margin-top: 20px;"></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="status-footer">
+        <p>Connected to: <strong>Tindi Tech Hotspot #1</strong></p>
+        <p>&copy; 2025 Tindi Tech. All rights reserved.</p>
+    </div>
+
+    <!-- PAYMENT MODAL -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content">
+            <h3 style="margin-bottom: 10px;">Pay with M-Pesa</h3>
+            <p id="payPlanName" style="color: #4facfe; font-weight: bold; margin-bottom: 20px;">1 Hour Access</p>
+            <p style="font-size: 2rem; margin-bottom: 20px;" id="payAmount">KES 20</p>
+
+            <div style="display:flex; gap:10px; margin-bottom: 20px;">
+                <select id="pay_country_code"
+                    style="width:100px; padding:10px; border-radius: 10px; border: none; text-align: center; cursor:pointer;"></select>
+                <input type="tel" id="payPhone" placeholder="7XXXXXXXX"
+                    style="flex:1; padding: 15px; border-radius: 10px; border: none;">
+            </div>
+
+            <button id="btnPayConfirm" class="btn-action" onclick="processPayment()">Pay Now</button>
+            <button class="btn-action" onclick="closeModal()"
+                style="background: transparent; border: 1px solid #555; margin-top: 10px;">Cancel</button>
+        </div>
+    </div>
+
+    <!-- UNIFIED LOADING/SUCCESS POPUP (Same as Checkout) -->
+    <div id="processOverlay" class="popup-overlay" style="display: none;">
+        <div class="popup-content">
+            <span id="popupClose" class="popup-close">&times;</span>
+            <div id="loadingSpinner" class="spinner"></div>
+            <div id="successIcon" class="icon-success">✔</div>
+            <div id="errorIcon" class="icon-error">✖</div>
+            <h2 id="popupTitle" style="color:#333; margin-top:10px;">Processing</h2>
+            <p id="popupMsg" style="color:#666;">Please wait...</p>
+        </div>
+    </div>
+
+    <!-- MIKROTIK HIDDEN FORM -->
+    <form id="routerLoginForm" action="http://192.168.88.1/login" method="post" style="display:none">
+        <input type="hidden" name="username" id="r_user">
+        <input type="hidden" name="password" id="r_pass">
+        <!-- Redirect to Home.html after router authorizes -->
+        <input type="hidden" name="dst" id="r_dst">
+    </form>
+
+    <script src="assets/js/site-api.js"></script>
+    <script>
+        // --- UI LOGIC ---
+        // Auto-populate countries
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.populateCountryCodes) window.populateCountryCodes('pay_country_code');
+        });
+
+        function switchTab(tab) {
+            document.querySelectorAll('.section').forEach(el => el.style.display = 'none');
+            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+
+            document.getElementById(`${tab}-section`).style.display = 'block';
+            event.target.classList.add('active');
+        }
+
+        // --- MAC ADDRESS CAPTURE ---
+        function getMacFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            // Different routers use different params. Common ones:
+            // client_mac, mac, uamip, etc.
+            return params.get('client_mac') || params.get('mac') || params.get('clientMac') || "00:00:00:00:00:00";
+        }
+
+        const clientMac = getMacFromUrl();
+        // console.log("Client MAC:", clientMac);
+
+        // --- PAYMENT LOGIC ---
+        let selectedPlanId = null;
+
+        function selectPlan(id, price) {
+            selectedPlanId = id;
+            document.getElementById('payPlanName').innerText = id + ' Access'; // Rough formatting
+            document.getElementById('payAmount').innerText = 'KES ' + price;
+            document.getElementById('paymentModal').style.display = 'flex';
+        }
+
+
+
+        async function processPayment() {
+            let phone = document.getElementById('payPhone').value;
+            const code = document.getElementById('pay_country_code').value;
+            if (!phone) { showMsg('error', 'Required', "Enter phone number"); return; }
+            phone = (code + phone).replace(/\s+/g, '');
+
+            // IMPROVED UX: Close input modal ONLY, keep process overlay
+            document.getElementById('paymentModal').style.display = 'none';
+            // Show new popup directly
+            showPopup('Initiating Payment', 'Connecting to M-Pesa...');
+
+            try {
+                // 1. Initiate Payment
+                const res = await fetch(`${API_URL}/wifi/pay`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ phone, plan_id: selectedPlanId, mac_address: clientMac })
+                });
+                const json = await res.json();
+
+                if (json.success && json.checkout_request_id) {
+                    // Success - Handover to Polling which will update the SAME modal
+                    startPolling(json.checkout_request_id);
+                } else {
+                    showMsg('error', 'Payment Failed', json.error || "Unknown response from server");
+                }
+            } catch (e) {
+                console.error(e);
+                showMsg('error', 'Connection Error', 'Failed to reach server. Please try again.');
+            }
+        }
+
+        // --- POLLING LOGIC ---
+        // --- POPUP LOGIC (MATCHING CHECKOUT) ---
+        const overlay = document.getElementById('processOverlay'); // Corrected ID
+        const title = document.getElementById('popupTitle');
+        const msg = document.getElementById('popupMsg');
+        const closeBtn = document.getElementById('popupClose');
+        const spinner = document.getElementById('loadingSpinner');
+        const successIcon = document.getElementById('successIcon');
+        const errorIcon = document.getElementById('errorIcon');
+
+        function showPopup(t, m, isLoading = true, isSuccess = false, isError = false) {
+            // Ensure we override any 'display: none' from closeModal or CSS
+            if (overlay) overlay.setAttribute('style', 'display: flex !important; z-index: 9999;');
+
+            if (title) title.innerText = t;
+            if (msg) msg.innerText = m;
+            if (spinner) spinner.style.display = isLoading ? 'block' : 'none';
+            if (successIcon) successIcon.style.display = isSuccess ? 'block' : 'none';
+            if (errorIcon) errorIcon.style.display = isError ? 'block' : 'none';
+            if (closeBtn) closeBtn.style.display = isLoading ? 'none' : 'inline-block';
+        }
+
+        if (closeBtn) closeBtn.onclick = () => { overlay.style.display = 'none'; };
+
+        function closeModal() {
+            document.querySelectorAll('.modal').forEach(el => el.style.display = 'none');
+            if (overlay) overlay.style.display = 'none';
+        }
+
+        // --- POLLING LOGIC ---
+        let pollingInterval = null;
+        let pollAttempts = 0;
+
+        function startPolling(checkoutId) {
+            // "Processing... Confirming payment with M-Pesa..."
+            showPopup('Processing...', 'Confirming payment with M-Pesa...');
+
+            pollAttempts = 0;
+            pollingInterval = setInterval(async () => {
+                pollAttempts++;
+                if (pollAttempts > 60) {
+                    clearInterval(pollingInterval);
+                    showPopup('Timeout', 'Waiting too long. Check payment status manually.', false, false, true);
+                    return;
+                }
+
+                try {
+                    const res = await fetch(`${window.API_URL}/wifi/status/${checkoutId}`);
+                    const json = await res.json();
+
+                    if (json.success && json.status === 'paid') {
+                        // SUCCESS
+                        clearInterval(pollingInterval);
+                        showPopup('Payment Successful!', 'Logging you in...', false, true, false);
+
+                        if (json.code) {
+                            setTimeout(() => autoLogin(json.code, json.router_type), 1500);
+                        }
+                    } else if (json.success && json.status === 'failed') {
+                        clearInterval(pollingInterval);
+                        showPopup('Payment Failed', 'Transaction was cancelled or failed.', false, false, true);
+                    }
+                } catch (e) { console.error("Poll error", e); }
+
+            }, 3000);
+        }
+
+        function showMsg(type, t, m) {
+            // Adapter for legacy calls -> New Popup
+            if (type === 'loading') showPopup(t, m, true, false, false);
+            else if (type === 'success') showPopup(t, m, false, true, false);
+            else showPopup(t, m, false, false, true);
+        }
+
+        async function autoLogin(code, routerType) {
+            try {
+                const res = await fetch(`${window.API_URL}/wifi/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code, mac_address: clientMac })
+                });
+                const json = await res.json();
+
+                if (json.success) {
+                    localStorage.setItem('wifi_code', code);
+                    handleRouterLogin(routerType || json.router_type, code); // Pass router type!
+                } else {
+                    showMsg('error', "Auto-login failed. Code: " + code, json.error);
+                    closeModal();
+                    switchTab('login');
+                    document.getElementById('loginCode').value = code;
+                }
+            } catch (e) {
+                showMsg('error', "Connection failed", "Auto-login error. Code: " + code);
+            }
+        }
+
+        function handleRouterLogin(type, code) {
+            if (type === 'mikrotik') {
+                // Fill hidden form and submit to 192.168.88.1
+                document.getElementById('r_user').value = code;
+                document.getElementById('r_pass').value = code;
+                // Use absolute URL for destination
+                const homeUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/')) + '/Home.html';
+                document.getElementById('r_dst').value = homeUrl; // MikroTik uses 'dst'
+
+                document.getElementById('routerLoginForm').submit();
+            } else if (type === 'tplink') {
+                // TP-Link Omada Controller handles auth backend-side.
+                // We just redirect the user to success page.
+                window.location.href = 'Home.html';
+            } else {
+                // Fallback
+                window.location.href = 'Home.html';
+            }
+        }
+
+
+        // --- LOGIN LOGIC ---
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const code = document.getElementById('loginCode').value;
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = "Connecting...";
+
+            try {
+                const res = await fetch(`${window.API_URL}/wifi/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code: code, mac_address: clientMac })
+                });
+                const json = await res.json();
+
+                if (json.success) {
+                    // Success!
+                    localStorage.setItem('wifi_code', code); // Save for heartbeat
+                    // Connect to Router
+                    handleRouterLogin(json.router_type, code);
+                } else {
+                    showMsg('error', 'Login Failed', json.error);
+                }
+            } catch (e) {
+                showMsg('error', 'Error', 'Could not connect to server');
+            } finally {
+                btn.innerText = originalText;
+            }
+        });
+
+        // --- CLAIM LOGIC ---
+        document.getElementById('claimForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const code = document.getElementById('claimCode').value;
+            const container = document.getElementById('claimResult');
+            container.innerHTML = 'Analyzing connection logs...';
+
+            try {
+                const res = await fetch(`${API_URL}/wifi/claim-compensation`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ code })
+                });
+                const json = await res.json();
+
+                if (json.success) {
+                    if (json.voucher_code) {
+                        container.innerHTML = `<div style="background: rgba(0,255,0,0.1); padding: 15px; border-radius: 10px; margin-top: 10px; border: 1px solid #00ff00;">
+                                                <h4 style="color: #00ff00;">COMPENSATION APPROVED</h4>
+                                                <p>${json.message}</p>
+                                                <div style="font-size: 1.5rem; font-weight: bold; margin: 10px 0; color: white; border: 1px dashed white; padding: 10px;">${json.voucher_code}</div>
+                                                <small>Use this code in the Login tab.</small>
+                                               </div>`;
+                    } else {
+                        container.innerHTML = `<p style="color: orange;">${json.message}</p>`;
+                    }
+                } else {
+                    container.innerHTML = `<p style="color: red;">${json.error || json.message}</p>`;
+                }
+            } catch (e) {
+                container.innerText = "Error contacting server.";
+            }
+        });
+
+
+        // AUTO-REDIRECT IF ALREADY LOGGED IN?
+        // Optional: Check if we have a valid session and valid heartbeat
+        // For now, let's just let them login again (re-ups heartbeat)
+    </script>
+</body>
+
+</html>
