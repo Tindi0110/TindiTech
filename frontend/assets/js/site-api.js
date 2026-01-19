@@ -198,8 +198,9 @@ function injectQuoteModal() {
         <div style="margin-bottom:15px;">
           <input type="email" name="email" placeholder="Email Address" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
         </div>
-        <div style="margin-bottom:15px;">
-          <input type="tel" name="phone" placeholder="Phone Number" required style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
+        <div style="margin-bottom:15px; display:flex; gap:10px; align-items:center;">
+          <select id="country_code_modal" name="country_code" style="width:120px; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:16px; background:white; cursor:pointer;"></select>
+          <input type="tel" name="phone" placeholder="Phone Number" required style="flex:1; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:16px;">
         </div>
         <div style="margin-bottom:15px;">
            <select name="service" style="width:100%; padding:12px; border:1px solid #ddd; border-radius:8px; font-size:16px; background:white;">
@@ -227,6 +228,11 @@ function injectQuoteModal() {
 
   // Setup Form Listener
   document.getElementById('globalQuoteForm').addEventListener('submit', handleQuoteSubmit);
+
+  // Populate Country Codes for Modal
+  if (window.populateCountryCodes) {
+    window.populateCountryCodes('country_code_modal', '+254');
+  }
 }
 
 window.openQuoteModal = function () {
@@ -261,7 +267,13 @@ async function handleQuoteSubmit(e) {
   btn.disabled = true;
 
   const formData = new FormData(form);
-  const data = Object.fromEntries(formData.entries());
+  const rawData = Object.fromEntries(formData.entries());
+
+  // Merge phone with country code
+  const data = {
+    ...rawData,
+    phone: ((rawData.country_code || "") + (rawData.phone || "")).replace(/\s+/g, '')
+  };
 
   try {
     const res = await fetch(`${API_URL}/quote`, {

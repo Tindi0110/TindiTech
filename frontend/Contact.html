@@ -79,12 +79,19 @@
           <!-- NEW PHONE FIELD -->
           <div class="form-group">
             <label for="phone">Phone Number</label>
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:10px; align-items:center;">
               <select id="country_code"
-                style="width:120px; padding:10px; border:2px solid #e0e0e0; border-radius:8px; background:white; cursor:pointer;"
+                style="width:140px; padding:12px; border:2px solid #e0e0e0; border-radius:8px; background:white; cursor:pointer;"
                 required></select>
               <input type="tel" id="phone" name="phone" placeholder="710 725 884" required style="flex:1;">
             </div>
+            <script>
+              document.addEventListener('DOMContentLoaded', () => {
+                if (window.populateCountryCodes) {
+                  window.populateCountryCodes('country_code', '+254');
+                }
+              });
+            </script>
           </div>
           <div class="form-group">
             <label for="subject">Subject</label>
