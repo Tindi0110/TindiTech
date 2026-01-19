@@ -69,7 +69,7 @@ function logoutUser() {
     sessionStorage.clear();
 
     // Optional: Call backend logout
-    fetch(`${API_AUTH}/logout`, { method: 'POST' }).catch(e => console.error(e));
+    fetch(`${API_AUTH}/logout`, { method: 'POST' }).catch(() => { });
 
     window.location.href = "Home.html";
 }

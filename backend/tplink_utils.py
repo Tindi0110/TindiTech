@@ -27,14 +27,13 @@ class OmadaBridge:
             )
             data = res.json()
             if data.get("errorCode") == 0:
-                self.token = data.get("result", {}).get("token")
-                print(f"[TPLINK] Logged in. Token: {self.token[:5]}...")
+                if config.DEBUG: print(f"[TPLINK] Logged in. Token: {self.token[:5]}...")
                 return True
             else:
-                print(f"[TPLINK] Login Failed: {data}")
+                if config.DEBUG: print(f"[TPLINK] Login Failed: {data}")
                 return False
         except Exception as e:
-            print(f"[TPLINK] Connection Error: {e}")
+            if config.DEBUG: print(f"[TPLINK] Connection Error: {e}")
             return False
 
     def authorize_client(self, mac_address, duration_minutes):
@@ -74,14 +73,14 @@ class OmadaBridge:
             data = res.json()
             
             if data.get("errorCode") == 0:
-                print(f"[TPLINK] Authorized {mac_address} for {duration_minutes} mins")
+                if config.DEBUG: print(f"[TPLINK] Authorized {mac_address} for {duration_minutes} mins")
                 return True, "Authorized"
             else:
-                print(f"[TPLINK] Auth Failed: {data}")
+                if config.DEBUG: print(f"[TPLINK] Auth Failed: {data}")
                 return False, f"Omada Error: {data.get('msg')}"
                 
         except Exception as e:
-             print(f"[TPLINK] Request Error: {e}")
+             if config.DEBUG: print(f"[TPLINK] Request Error: {e}")
              return False, str(e)
 
 # Singleton

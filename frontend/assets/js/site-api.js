@@ -279,7 +279,6 @@ async function handleQuoteSubmit(e) {
       showToast('Error: ' + (json.error || 'Unknown error occurred'), 'error');
     }
   } catch (err) {
-    console.error(err);
     showToast('Connection Failed. Ensure backend is running.', 'error');
   } finally {
     btn.innerText = originalText;
@@ -366,7 +365,6 @@ async function fetchProducts(query = '') {
       container.innerHTML = '<p class="text-center" style="width: 100%;">No products found.</p>';
     }
   } catch (error) {
-    console.error("Failed to load products:", error);
     container.innerHTML = `<div style="text-align:center; color:#721c24; background-color:#f8d7da; border-color:#f5c6cb; padding:20px; border-radius:5px; margin:20px;">
         <h3>⚠️ Connection Failed</h3>
         <p>Could not load products. Please ensure the backend server is running.</p>
@@ -382,51 +380,124 @@ function setupContactForm() {
   form.addEventListener('submit', handleQuoteSubmit); // Reuse logic if fields match, or simple fetch
 }
 
-// ============== 4. CART & MODAL UTILS ==============
-window.addToCart = function (name, price, image, maxStock, qtyToAdd) {
-  try {
-    let cart = [];
+// ============== 4. PROFESSIONAL CART MANAGER ==============
+class CartManager {
+  constructor() {
+    this.storageKey = 'cart';
+    this.cart = this.load();
+  }
 
-    // Ensure strict types
+  load() {
+    try {
+      const data = localStorage.getItem(this.storageKey);
+      if (!data) return [];
+      const parsed = JSON.parse(data);
+      if (!Array.isArray(parsed)) return [];
+      return this.validate(parsed);
+    } catch (e) {
+      return [];
+    }
+  }
+
+  validate(cart) {
+    // Ensure each item has required fields and proper types
+    return cart.filter(item =>
+      item &&
+      typeof item.name === 'string' &&
+      typeof item.price === 'number' &&
+      typeof item.quantity === 'number' &&
+      item.quantity > 0
+    );
+  }
+
+  save() {
+    localStorage.setItem(this.storageKey, JSON.stringify(this.cart));
+    updateCartCount();
+  }
+
+  addItem(name, price, image, maxStock, qtyToAdd) {
     const qty = parseInt(qtyToAdd, 10);
-    const limit = parseInt(maxStock, 10);
+    const limit = parseInt(maxStock, 10) || 999;
 
-    if (!qty || qty < 1) return showToast("Please enter a valid quantity.", "warning");
-
-    // Direct limit check (Initial add)
-    if (qty > limit) {
-      showToast(`Sorry, only ${limit} units available.`, "warning");
-      return;
+    if (isNaN(qty) || qty < 1) {
+      if (window.showToast) window.showToast("Please enter a valid quantity.", "warning");
+      return false;
     }
 
-    try { cart = JSON.parse(localStorage.getItem("cart")) || []; } catch (e) { }
+    if (qty > limit) {
+      if (window.showToast) window.showToast(`Sorry, only ${limit} units available.`, "warning");
+      return false;
+    }
 
-    const existing = cart.find(i => i.name === name);
-
+    const existing = this.cart.find(i => i.name === name);
     if (existing) {
       const currentQty = parseInt(existing.quantity, 10) || 0;
       const newTotal = currentQty + qty;
 
-      // Check total limit
       if (newTotal > limit) {
-        showToast(`Stock limit reached! You have ${currentQty} in cart.`, "warning");
-        return;
+        if (window.showToast) window.showToast(`Stock limit reached! You have ${currentQty} in cart.`, "warning");
+        return false;
       }
       existing.quantity = newTotal;
-      // Update maxStock in case it changed
       existing.maxStock = limit;
-    }
-    else {
-      cart.push({ name, price, image, quantity: qty, maxStock: limit });
+    } else {
+      this.cart.push({ name, price, image, quantity: qty, maxStock: limit });
     }
 
-    localStorage.setItem("cart", JSON.stringify(cart));
-    showToast(`${qtyToAdd} x ${name} added to cart!`, 'success');
-    updateCartCount();
-  } catch (err) {
-    console.error(err);
-    showToast("Unable to add item to cart.", 'error');
+    this.save();
+    if (window.showToast) window.showToast(`${qty} x ${name} added to cart!`, 'success');
+    return true;
   }
+
+  updateQuantity(index, newQty) {
+    if (this.cart[index]) {
+      const qty = parseInt(newQty, 10);
+      const limit = parseInt(this.cart[index].maxStock, 10) || 999;
+
+      if (qty > limit) {
+        if (window.showToast) window.showToast(`Sorry, only ${limit} units available in stock.`, 'warning');
+        return false;
+      }
+
+      this.cart[index].quantity = qty;
+      if (this.cart[index].quantity <= 0) {
+        this.cart.splice(index, 1);
+      }
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
+  removeItem(index) {
+    if (this.cart[index]) {
+      this.cart.splice(index, 1);
+      this.save();
+      return true;
+    }
+    return false;
+  }
+
+  getTotal() {
+    return this.cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+  }
+
+  getCount() {
+    return this.cart.reduce((acc, item) => acc + (item.quantity || 1), 0);
+  }
+
+  clear() {
+    this.cart = [];
+    this.save();
+  }
+}
+
+// Global instance
+window.cartManager = new CartManager();
+
+// Legacy wrapper for compatibility with existing onclick attributes
+window.addToCart = function (name, price, image, maxStock, qtyToAdd) {
+  return window.cartManager.addItem(name, price, image, maxStock, qtyToAdd);
 };
 
 function updateCartCount() {

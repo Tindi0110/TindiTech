@@ -66,7 +66,8 @@ def init_db_indexes():
         orders_col.create_index("order_id", unique=True)
         # print("[DB] Indexes ensured for high performance")
     except Exception as e:
-        print(f"[DB] Index warning: {e}")
+        if config.DEBUG:
+            print(f"[DB] Index warning: {e}")
 
 
 # Run indexing trigger moved to after DB init
@@ -160,6 +161,12 @@ def is_token_valid(user: dict) -> bool:
     return datetime.datetime.now() < expiration
 
 
+def normalize_phone(phone: str) -> str:
+    """Strip all non-numeric characters from a phone number for consistent matching."""
+    if not phone: return ""
+    return re.sub(r"\D", "", str(phone))
+
+
 def json_serializer(data):
     """Helper to convert PyMongo objects (like ObjectId, datetime) to JSON serializable format."""
     if isinstance(data, list):
@@ -185,10 +192,10 @@ def generate_otp():
 
 
 def send_sms_mock(phone, message):
-    """Mock SMS sender - logs to console for dev/testing."""
-    # In production, integrate Africa's Talking / Twilio here
-    print(f"\n[MOCK SMS] To: {phone}")
-    print(f"[MOCK SMS] Message: {message}\n")
+    """Mock SMS sender - logs to console for dev/testing if DEBUG enabled."""
+    if config.DEBUG:
+        print(f"\n[MOCK SMS] To: {phone}")
+        print(f"[MOCK SMS] Message: {message}\n")
     return True
 
 
@@ -200,9 +207,11 @@ def send_async_email(subject, recipient, body):
                 msg = Message(subject, recipients=[recipient])
                 msg.body = body
                 mail.send(msg)
-                print(f"[MAIL] Sent: {subject} to {recipient}")
+                if config.DEBUG:
+                    print(f"[MAIL] Sent: {subject} to {recipient}")
         except Exception as e:
-            print(f"[MAIL] Failed to send {subject} to {recipient}: {e}")
+            if config.DEBUG:
+                print(f"[MAIL] Failed to send {subject} to {recipient}: {e}")
     
     # Start thread and return immediately
     thread = threading.Thread(target=_send)
@@ -471,10 +480,12 @@ def forgot_password():
                 body=f"Hi {user['fname']},\n\nYou requested to reset your password. Click the link below to reset it:\n\n{reset_link}\n\nIf you did not request this, please ignore this email.\n\nLink expires in 1 hour."
             )
             mail.send(msg)
-            print(f"[MAIL] Sent reset link to {email}")
+            if config.DEBUG:
+                print(f"[MAIL] Sent reset link to {email}")
             email_sent = True
         else:
-            print("[MAIL] Mail not configured. Reset Key:", reset_token)
+            if config.DEBUG:
+                print("[MAIL] Mail not configured. Reset Key:", reset_token)
 
         # DEBUG MODE HELPER
         if config.DEBUG and not email_sent:
@@ -485,7 +496,8 @@ def forgot_password():
             })
 
     except Exception as e:
-        print(f"[MAIL] Error sending email: {e}")
+        if config.DEBUG:
+            print(f"[MAIL] Error sending email: {e}")
         if config.DEBUG:
             return jsonify({"success": False, "error": f"Mail Error: {str(e)}"})
 
@@ -881,66 +893,81 @@ def get_orders():
 
 @app.route("/create-order", methods=["POST"])
 def create_order():
-    data = request.get_json() or {}
-    if not data.get("items") or not data.get("customer"):
-        return jsonify({"success": False, "error": "Invalid order data"}), 400
-
-    items = data["items"]
-    
-    # --- STOCK MANAGEMENT: CHECK & DEDUCT ---
-    stock_deductions = [] # To track what we need to deduct
-    
-    # 1. Validation Pass
-    for item in items:
-        name = item.get("name")
-        qty = int(item.get("quantity", 1))
-        
-        product = products_col.find_one({"name": name})
-        if not product:
-            return jsonify({"success": False, "error": f"Product '{name}' no longer exists"}), 400
-        
-        current_stock = int(product.get("stock", 0))
-        if current_stock < qty:
-            return jsonify({"success": False, "error": f"Insufficient stock for '{name}'. Only {current_stock} left."}), 400
-            
-        stock_deductions.append((product["_id"], qty))
-
-    # 2. Deduction Pass (with Rollback capability)
-    deducted_log = []
     try:
-        for pid, qty in stock_deductions:
-            # Atomic update: only deduct if stock >= qty
-            res = products_col.update_one(
-                {"_id": pid, "stock": {"$gte": qty}},
-                {"$inc": {"stock": -qty}}
-            )
-            if res.matched_count == 0:
-                raise Exception(f"Stock changed during processing")
-            deducted_log.append((pid, qty))
+        data = request.get_json() or {}
+        if not data.get("items") or not data.get("customer"):
+            return jsonify({"success": False, "error": "Invalid order data"}), 400
+
+        items = data["items"]
+        
+        # --- STOCK MANAGEMENT: CHECK & DEDUCT ---
+        stock_deductions = [] # To track what we need to deduct
+        
+        # 1. Validation Pass
+        for item in items:
+            name = item.get("name")
+            qty = int(item.get("quantity", 1))
+            
+            product = products_col.find_one({"name": name})
+            if not product:
+                return jsonify({"success": False, "error": f"Product '{name}' no longer exists"}), 400
+            
+            current_stock = int(product.get("stock", 0))
+            if current_stock < qty:
+                return jsonify({"success": False, "error": f"Insufficient stock for '{name}'. Only {current_stock} left."}), 400
+                
+            stock_deductions.append((product["_id"], qty))
+
+        # 2. Deduction Pass (with Rollback capability)
+        deducted_log = []
+        try:
+            for pid, qty in stock_deductions:
+                # Atomic update: only deduct if stock >= qty
+                res = products_col.update_one(
+                    {"_id": pid, "stock": {"$gte": qty}},
+                    {"$inc": {"stock": -qty}}
+                )
+                if res.matched_count == 0:
+                    raise Exception(f"Stock changed during processing")
+                deducted_log.append((pid, qty))
+        except Exception as e:
+            # Rollback previous deductions if any failure occurs
+            for pid, qty in deducted_log:
+                products_col.update_one({"_id": pid}, {"$inc": {"stock": qty}})
+            return jsonify({"success": False, "error": f"Stock error: {str(e)}"}), 400
+
+        # --- USER ACCOUNT LINKING ---
+        token = request.headers.get("Authorization")
+        username = None
+        if token:
+            user = users_col.find_one({"token": token})
+            if user:
+                username = user.get("username")
+        
+        phone_raw = data.get("customer", {}).get("phone", "")
+        phone_norm = normalize_phone(phone_raw)
+
+        order_id = str(uuid.uuid4())
+        order = {
+            "order_id": order_id,
+            "username": username, # Linked account if logged in
+            "phone_normalized": phone_norm, # For smart matching
+            "created_at": datetime.datetime.now(),
+            "customer": data["customer"],
+            "items": data["items"],
+            "subtotal": data.get("sub"),
+            "tax": data.get("tax"),
+            "shipping": data.get("shipping"),
+            "total": data.get("total"),
+            "status": "pending",
+            "payment": {"status": "pending", "method": "mpesa"}
+        }
+        orders_col.insert_one(order)
+        return jsonify({"success": True, "message": "Order created", "orderId": order_id})
     except Exception as e:
-        # Rollback previous deductions if any failure occurs
-        # Error logging would go here in production
-        for pid, qty in deducted_log:
-            products_col.update_one({"_id": pid}, {"$inc": {"stock": qty}})
-        return jsonify({"success": False, "error": "One or more items became out of stock during checkout. Please try again."}), 400
-
-    # --- END STOCK MANAGEMENT ---
-
-    order_id = str(uuid.uuid4())
-    order = {
-        "order_id": order_id,
-        "created_at": datetime.datetime.now(),
-        "customer": data["customer"],
-        "items": data["items"],
-        "subtotal": data.get("sub"),
-        "tax": data.get("tax"),
-        "shipping": data.get("shipping"),
-        "total": data.get("total"),
-        "status": "pending",
-        "payment": {"status": "pending", "method": "mpesa"}
-    }
-    orders_col.insert_one(order)
-    return jsonify({"success": True, "message": "Order created", "orderId": order_id})
+        if config.DEBUG:
+            print(f"Error creating order: {e}")
+        return jsonify({"success": False, "error": f"Server error: {str(e)}"}), 500
 
 
 @app.route("/stk-push", methods=["POST"])
@@ -991,7 +1018,8 @@ def mpesa_callback():
     Safaricom sends a POST request here when a transaction completes or fails.
     """
     data = request.get_json() or {}
-    print(f"[M-PESA] Callback Received: {data}")
+    if config.DEBUG:
+        print(f"[M-PESA] Callback Received: {data}")
     
     # Check if Body exists
     body = data.get("Body", {})
@@ -1004,7 +1032,8 @@ def mpesa_callback():
     if not checkout_id:
         return jsonify({"success": False, "message": "Invalid Callback payload"}), 400
 
-    print(f"[M-PESA] Processing Callback. ID: {checkout_id}, Code: {result_code}, Desc: {result_desc}")
+    if config.DEBUG:
+        print(f"[M-PESA] Processing Callback. ID: {checkout_id}, Code: {result_code}, Desc: {result_desc}")
 
     # Determine status
     payment_status = "failed"
@@ -1021,7 +1050,8 @@ def mpesa_callback():
         phone = next((item.get("Value") for item in meta_items if item.get("Name") == "PhoneNumber"), None)
         amount_paid = next((item.get("Value") for item in meta_items if item.get("Name") == "Amount"), None)
         
-        print(f"[M-PESA] Success! Receipt: {receipt_number}, Amount: {amount_paid}")
+        if config.DEBUG:
+            print(f"[M-PESA] Success! Receipt: {receipt_number}, Amount: {amount_paid}")
         
         # Update details map
         payment_details = {
@@ -1033,7 +1063,8 @@ def mpesa_callback():
         }
     else:
         # User Cancelled or Failed
-        print(f"[M-PESA] Payment Failed/Cancelled.")
+        if config.DEBUG:
+            print(f"[M-PESA] Payment Failed/Cancelled.")
         payment_details = {
             "payment.status": "failed",
             "payment.failure_reason": result_desc
@@ -1050,10 +1081,10 @@ def mpesa_callback():
     )
     
     if result.matched_count > 0:
-        print(f"[M-PESA] Order updated via callback.")
+        if config.DEBUG: print(f"[M-PESA] Order updated via callback.")
     else:
         # Could be a Wi-Fi Session?
-        print(f"[M-PESA] No order found for CheckoutID {checkout_id}. Checking Wi-Fi sessions...")
+        if config.DEBUG: print(f"[M-PESA] No order found for CheckoutID {checkout_id}. Checking Wi-Fi sessions...")
         # (Optional: Add logic to update Wi-Fi session if that's also using this callback)
         wifi_result = wifi_sessions_col.update_one(
              {"checkout_request_id": checkout_id},
@@ -1064,9 +1095,9 @@ def mpesa_callback():
              }}
         )
         if wifi_result.matched_count > 0:
-             print("[M-PESA] Wi-Fi Session updated.")
+             if config.DEBUG: print("[M-PESA] Wi-Fi Session updated.")
         else:
-             print("[M-PESA] No matching record found for callback.")
+             if config.DEBUG: print("[M-PESA] No matching record found for callback.")
 
     return jsonify({"success": True})
 
@@ -1168,12 +1199,15 @@ def get_user_orders():
     user = users_col.find_one({"token": token})
     if not user: return jsonify({"success": False, "error": "Invalid token"}), 401
 
-    # Find orders by email or some unique customer identifier
-    # Using phone or email from the customer object in the order
+    # Find orders by username, email or normalized phone
+    phone_norm = normalize_phone(user.get("phone", ""))
+    
     orders = list(orders_col.find({
         "$or": [
-            {"customer.email": user["email"]},
-            {"customer.phone": user["phone"]}
+            {"username": user.get("username")},
+            {"customer.email": user.get("email")},
+            {"phone_normalized": phone_norm},
+            {"customer.phone": user.get("phone")} # Fallback for old orders
         ]
     }).sort("created_at", -1))
 
@@ -1307,7 +1341,8 @@ def auto_login():
     except jwt.InvalidTokenError:
         return jsonify({"success": False, "error": "Invalid token"}), 401
     except Exception as e:
-        print(f"Error: {e}")
+        if config.DEBUG:
+            print(f"Error: {e}")
         return jsonify({"success": False, "error": "Internal Error"}), 500
 
 @app.route("/quote", methods=["POST"])

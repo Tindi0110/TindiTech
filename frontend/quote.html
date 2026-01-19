@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Request Quote - Tindi Tech</title>
   <link rel="stylesheet" href="assets/css/style.css">
-
+  <script src="assets/js/site-api.js"></script>
   <style>
     /* Global Styles */
     body {
@@ -298,10 +298,11 @@
     </div>
   </footer>
 
-  <script src="assets/js/site-api.js"></script>
+
+  <script src="assets/js/auth.js"></script>
   <script>
-    // const API_URL = "http://127.0.0.1:5000";
-    const API_URL = window.API_URL;
+    // API_URL is provided globally by site-api.js. Using var if override needed.
+    var BACKEND_URL = window.API_URL || "http://127.0.0.1:5000";
 
     document.getElementById("quoteForm").addEventListener("submit", async function (e) {
       e.preventDefault();

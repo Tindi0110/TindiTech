@@ -19,6 +19,7 @@
       padding: 0 20px;
     }
   </style>
+  <script src="assets/js/site-api.js"></script>
 </head>
 <header>
   <div class="logo">
@@ -103,110 +104,84 @@
     </div>
   </footer>
   <script>
-    /* ---------------------------
-       CART SYSTEM USING LOCALSTORAGE
-    ---------------------------- */
-    // Get saved cart or empty list
-    let cart = [];
-    try {
-      cart = JSON.parse(localStorage.getItem("cart")) || [];
-    } catch (e) {
-      // Corrupted data - reset to empty cart
-      cart = [];
-      localStorage.setItem("cart", "[]");
-    }
+    // Use the professional CartManager from site-api.js
+    const cartManager = window.cartManager;
+
     // Load cart when page opens
     window.onload = function () {
       displayCart();
     };
+
     // Display cart items
     function displayCart() {
       const container = document.getElementById("cartItems");
       const totalEl = document.getElementById("cartTotal");
       container.innerHTML = "";
-      if (!cart || cart.length === 0) {
+
+      const cartItems = cartManager.cart;
+
+      if (!cartItems || cartItems.length === 0) {
         container.innerHTML = "<p class='empty-cart'>Your cart is empty. Looks like you have not added anything in the cart yet.</p>";
         totalEl.textContent = "0";
         return;
       }
-      let total = 0;
-      cart.forEach((item, index) => {
-        // Validation
-        const price = parseFloat(item.price) || 0;
-        const quantity = parseInt(item.quantity) || 1;
-        // Ensure local state is consistent
-        item.price = price;
-        item.quantity = quantity;
-        const itemTotal = price * quantity;
-        total += itemTotal;
-        // Image fallback
+
+      cartItems.forEach((item, index) => {
+        const itemTotal = item.price * item.quantity;
         const imgSrc = item.image || 'img/pics/default-product.png';
+
         container.innerHTML += `
             <div class="cart-item">
                 <img src="${imgSrc}" class="cart-img" alt="${item.name}">
                 <div class="cart-info">
                     <h3>${item.name}</h3>
-                    <p>Price: ${price} KES</p>
-                    <p>Subtotal: ${itemTotal} KES</p>
+                    <p>Price: ${item.price.toLocaleString()} KES</p>
+                    <p>Subtotal: ${itemTotal.toLocaleString()} KES</p>
                     <div class="qty-box">
-                        <button onclick="changeQty(${index}, -1)">-</button>
-                        <span>${quantity}</span>
-                        <button onclick="changeQty(${index}, 1)">+</button>
+                        <button onclick="updateQty(${index}, -1)">-</button>
+                        <span>${item.quantity}</span>
+                        <button onclick="updateQty(${index}, 1)">+</button>
                     </div>
                 </div>
-                <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+                <button class="remove-btn" onclick="deleteItem(${index})">Remove</button>
             </div>
         `;
       });
-      totalEl.textContent = total;
+      totalEl.textContent = cartManager.getTotal().toLocaleString();
     }
+
     // Change quantity
-    function changeQty(index, amount) {
-      if (cart[index]) {
-        const currentQty = parseInt(cart[index].quantity) || 0;
-        const newQty = currentQty + amount;
-
-        // Stock Check for increase
-        if (amount > 0) {
-          const max = cart[index].maxStock || 999; // Default high if missing, but should be there
-          if (newQty > max) {
-            showToast(`Sorry, only ${max} units available in stock.`, 'warning');
-            return;
-          }
+    function updateQty(index, amount) {
+      const item = cartManager.cart[index];
+      if (item) {
+        const newQty = item.quantity + amount;
+        if (cartManager.updateQuantity(index, newQty)) {
+          displayCart();
         }
-
-        cart[index].quantity = newQty;
-        if (cart[index].quantity <= 0) {
-          cart.splice(index, 1);
-        }
-        saveCart();
-        displayCart();
       }
     }
+
     // Remove item
-    function removeItem(index) {
-      cart.splice(index, 1);
-      saveCart();
-      displayCart();
+    async function deleteItem(index) {
+      if (await window.secureConfirm("Remove this item from your cart?", "Remove", true)) {
+        if (cartManager.removeItem(index)) {
+          displayCart();
+        }
+      }
     }
-    // Save cart to localStorage
-    function saveCart() {
-      localStorage.setItem("cart", JSON.stringify(cart));
-    }
+
     // Checkout button
     const checkoutBtn = document.getElementById("checkoutBtn");
     if (checkoutBtn) {
       checkoutBtn.onclick = () => {
-        if (cart.length === 0) {
+        if (cartManager.cart.length === 0) {
           showToast("Your cart is empty!", 'info');
         } else {
-          // Redirect to checkout page
           window.location.href = "checkout.html";
         }
       }
     }
   </script>
-  <script src="assets/js/site-api.js"></script>
   <script src="assets/js/auth.js"></script>
 </body>
 

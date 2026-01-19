@@ -186,13 +186,10 @@
     const TAX_RATE = 0.16;
     const FLAT_SHIPPING = 150;
     // =================================================
-    // Load cart from localStorage
-    let cart = [];
-    try {
-      cart = JSON.parse(localStorage.getItem('cart')) || [];
-    } catch (e) {
-      console.error("Cart error", e);
-    }
+    // Use the professional CartManager from site-api.js
+    const cartManager = window.cartManager;
+    const cart = cartManager.cart;
+
     const itemsContainer = document.getElementById('itemsContainer');
     // Render Cart Items
     function renderCart() {
@@ -234,6 +231,18 @@
     }
     // Initial render
     renderCart();
+
+    // Pre-fill user data if logged in
+    document.addEventListener('DOMContentLoaded', () => {
+      const userEmail = localStorage.getItem('user_email');
+      const userName = localStorage.getItem('user_name');
+      const userPhone = localStorage.getItem('user_phone'); // If stored
+
+      if (userEmail) document.getElementById('email').value = userEmail;
+      if (userName) document.getElementById('name').value = userName;
+      // Handle phone if format matches or just skip to avoid pattern errors
+    });
+
     // Handle Form Submission
     const form = document.getElementById('checkoutForm');
     const overlay = document.getElementById('overlay');
@@ -282,7 +291,7 @@
           setTimeout(() => {
             showPopup('Payment Successful!', 'Thank you! Your order has been placed successfully.', false, true, false);
             // Clear cart
-            localStorage.removeItem('cart');
+            cartManager.clear();
             // Redirect after delay (optional)
           }, 3000);
         }, 2000);
@@ -291,13 +300,17 @@
         try {
           showPopup('Creating Order', 'Connecting to server...');
           // 1. Create Order
+          const headers = { 'Content-Type': 'application/json' };
+          const token = localStorage.getItem('token');
+          if (token) headers['Authorization'] = token;
+
           const createRes = await fetch(`${BACKEND_URL}/create-order`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: headers,
             body: JSON.stringify(payload)
           });
           const createJson = await createRes.json();
-          if (!createJson.success) throw new Error(createJson.message || 'Order creation failed');
+          if (!createJson.success) throw new Error(createJson.error || createJson.message || 'Order creation failed');
           // 2. STK Push
           showPopup('M-Pesa Prompt Sent', `A payment request has been sent to ${customer.phone}. Please enter your PIN.`);
           const stkRes = await fetch(`${BACKEND_URL}/stk-push`, {
@@ -329,13 +342,20 @@
               if (statusJson.success && statusJson.order.payment.status === 'paid') {
                 clearInterval(pollInterval);
                 showPopup('Payment Received', 'Thank you! Your order is confirmed.', false, true, false);
-                localStorage.removeItem('cart');
+
+                // Clear cart only when paid as requested
+                if (window.cartManager) {
+                  window.cartManager.clear();
+                } else {
+                  localStorage.removeItem('cart');
+                  updateCartCount();
+                }
               } else if (statusJson.success && statusJson.order.payment.status === 'failed') {
                 clearInterval(pollInterval);
                 showPopup('Payment Failed', 'The payment was cancelled or failed.', false, false, true);
               }
             } catch (err) {
-              console.error("Polling error", err);
+              // Silently log or ignore polling errors to keep UI clean
             }
           }, 3000);
 
@@ -361,7 +381,6 @@
           }, 5000);
 
         } catch (err) {
-          console.error(err);
           showPopup('Error', err.message || 'Something went wrong', false, false, true);
         }
       }

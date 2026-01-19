@@ -45,8 +45,7 @@
   </div>
   <script src="assets/js/site-api.js"></script>
   <script>
-    // const API_URL = "http://127.0.0.1:5000";
-    const API_URL = window.API_URL;
+    var API_URL = window.API_URL || "http://127.0.0.1:5000";
     async function runTests() {
       // Test 1: Basic Ping (using products as a ping)
       try {
@@ -68,7 +67,6 @@
           document.getElementById('test2').innerHTML = `<span class="error">❌ Failed to parse JSON. Server might be sending HTML errors.</span>`;
         }
       } catch (err) {
-        console.error(err);
         let msg = "❌ CONNECTION FAILED.";
         if (err.message.includes("Failed to fetch")) {
           msg += "<br>Possible Causes:<br>1. Python server is NOT running.<br>2. CORS blocking (check console).<br>3. Port mismatch (is server on 5000?)";

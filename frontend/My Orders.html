@@ -16,20 +16,7 @@
     }
   </style>
   <script src="assets/js/site-api.js"></script>
-  <script>
-    window.onerror = function (msg, url, lineNo, columnNo, error) {
-      document.body.innerHTML = `
-            <div style="padding:20px; color:red; font-family:monospace; background:white;">
-                <h3>Global Error Caught</h3>
-                <p><strong>Message:</strong> ${msg}</p>
-                <p><strong>URL:</strong> ${url}</p>
-                <p><strong>Line:</strong> ${lineNo}, <strong>Col:</strong> ${columnNo}</p>
-                <p><strong>Stack:</strong> ${error ? error.stack : 'N/A'}</p>
-            </div>
-        `;
-      return false;
-    };
-  </script>
+
 </head>
 
 <body>
@@ -62,23 +49,21 @@
           here</a>
       </p>
     </div>
-    <div id="ordersContent" style="display: none;">
+    <div id="ordersContent">
       <div class="page-header">
         <h1>My Order History</h1>
       </div>
       <div id="ordersList">
-        <p style="text-align:center;">Loading orders...</p>
+        <p style="text-align:center; color: #666; padding: 40px;">Initializing your order history...</p>
       </div>
     </div>
   </div>
 
   <script>
-    // const API_URL = "http://127.0.0.1:5000";
-    // API_URL might be defined in site-api.js. Use window.API_URL if needed, or rely on global.
-    const apiUrl = window.API_URL;
-    // From site-api.js
+    // Use global API_URL from site-api.js or fallback if missing
+    var BACKEND_URL = window.API_URL || "http://127.0.0.1:5000";
     // User needs a token to identify their orders (Backend finds user by token)
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    var token = localStorage.getItem("token") || sessionStorage.getItem("token");
 
     async function loadOrders() {
       if (!token) {
@@ -86,8 +71,10 @@
         document.getElementById('ordersContent').style.display = 'none';
         return;
       }
+      document.getElementById('authWarning').style.display = 'none';
+      document.getElementById('ordersContent').style.display = 'block';
       try {
-        const res = await fetch(`${API_URL}/my-orders`, {
+        const res = await fetch(`${BACKEND_URL}/my-orders`, {
           headers: { 'Authorization': token }
         });
         const json = await res.json();
@@ -100,7 +87,6 @@
           document.getElementById('ordersList').innerHTML = `<p>Error: ${json.error}</p>`;
         }
       } catch (e) {
-        console.error(e);
         document.getElementById('ordersContent').style.display = 'block';
         document.getElementById('ordersList').innerHTML = `<p>Failed to connect to server.</p>`;
       }
@@ -116,10 +102,10 @@
         const date = new Date(order.created_at).toLocaleDateString();
         const total = (order.total || 0).toLocaleString();
         // Items list
-        const itemsHtml = order.items.map(i => `
+        const itemsHtml = (order.items || []).map(i => `
                     <div class="order-item-row">
-                        <span>${i.name} (x${i.quantity})</span>
-                        <span>${parseFloat(i.price).toLocaleString()}</span>
+                        <span>${i.name || 'Unknown'} (x${i.quantity || 1})</span>
+                        <span>${(parseFloat(i.price) || 0).toLocaleString()}</span>
                     </div>
                 `).join('');
         // Buttons
@@ -182,28 +168,23 @@
     async function cancelOrder(id) {
       if (!await secureConfirm("Are you sure you want to PERMANENTLY DELETE this order?", "Delete", true)) return;
       try {
-        const res = await fetch(`${API_URL}/my-orders/${id}/cancel`, {
+        const res = await fetch(`${BACKEND_URL}/my-orders/${id}/cancel`, {
           method: 'PATCH',
           headers: { 'Authorization': token }
         });
         const json = await res.json();
         if (json.success) {
-          showToast("Order deleted successfully.", 'success');
-          loadOrders(); // Refresh
-        } else {
-          console.error("Delete failed:", json);
           showToast("Error: " + (json.error || "Unknown error"), 'error');
         }
       } catch (e) {
-        console.error("Delete request error:", e);
-        showToast("Failed to delete order. Check console for details.", 'error');
+        showToast("Failed to delete order.", 'error');
       }
     }
 
     async function requestRefund(id) {
       if (!await secureConfirm("Initiate a refund request for this order?", "Request Refund")) return;
       try {
-        const res = await fetch(`${API_URL}/my-orders/${id}/refund-request`, {
+        const res = await fetch(`${BACKEND_URL}/my-orders/${id}/refund-request`, {
           method: 'POST',
           headers: { 'Authorization': token }
         });

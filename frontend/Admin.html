@@ -927,7 +927,7 @@
         applyRBAC(role);
         document.body.style.visibility = 'visible';
       } catch (e) {
-        console.error("Session check failed", e);
+        // Silently fail session check or handle via UI
       }
     }
 
@@ -1037,7 +1037,7 @@
             tbody.innerHTML += row;
           });
         }
-      } catch (e) { console.error("Wifi Load Error:", e); }
+      } catch (e) { }
     }
 
     async function generateVoucher() {
@@ -1104,19 +1104,17 @@
           renderRevenueChart(res.revenue_trend);
           renderStatusChart(res.status_distribution);
         }
-      } catch (e) { console.error("Chart Error", e); }
+      } catch (e) { }
     }
 
     function renderRevenueChart(data) {
       if (!data || !Array.isArray(data) || data.length === 0) {
-        console.warn('No revenue data to display');
         return;
       }
 
       try {
         const ctx = document.getElementById('revenueChart');
         if (!ctx) {
-          console.error('Revenue chart canvas not found');
           return;
         }
 
@@ -1141,20 +1139,17 @@
           options: { responsive: true, maintainAspectRatio: false }
         });
       } catch (error) {
-        console.error('Error rendering revenue chart:', error);
       }
     }
 
     function renderStatusChart(data) {
       if (!data || typeof data !== 'object' || Object.keys(data).length === 0) {
-        console.warn('No status data to display');
         return;
       }
 
       try {
         const ctx = document.getElementById('statusChart');
         if (!ctx) {
-          console.error('Status chart canvas not found');
           return;
         }
 
@@ -1186,7 +1181,6 @@
           options: { responsive: true, maintainAspectRatio: false }
         });
       } catch (error) {
-        console.error('Error rendering status chart:', error);
       }
     }
 
@@ -1332,7 +1326,7 @@
                 tbody.innerHTML += row;
               });
         if (meta) renderPagination(meta, 'products-pagination', 'loadProducts');
-      } catch (e) { console.error(e); }
+      } catch (e) { }
     }
 
     async function loadUsers(page = 1) {
@@ -1382,16 +1376,9 @@
                     tbody.innerHTML += row;
                   });
               if (meta) renderPagination(meta, 'users-pagination', 'loadUsers');
-            } else {
-          tbody.innerHTML = `<tr>
-              <td colspan="7" style="color:red">Error: ${json.error || 'Unknown Backend Error'}</td>
-            </tr>`;
-        }
+            }
       } catch (e) {
-        console.error(e);
-        tbody.innerHTML = `<tr>
-              <td colspan="7" style="color:red">JS Error: ${e.message}</td>
-            </tr>`;
+        // Handle quietly
       }
     }
 
@@ -1468,7 +1455,7 @@
         }).join('');
 
         if (msgMeta) renderPagination(msgMeta, 'messages-pagination', 'loadMessages');
-      } catch (e) { console.error(e); }
+      } catch (e) { }
     }
 
     function filterOrders(status) {

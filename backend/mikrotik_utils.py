@@ -20,7 +20,7 @@ class MikrotikBridge:
             )
             return self.connection.get_api()
         except Exception as e:
-            print(f"[MIKROTIK] Connection Failed: {e}")
+            if config.DEBUG: print(f"[MIKROTIK] Connection Failed: {e}")
             return None
 
     def add_hotspot_user(self, username, password, profile="default", limit_uptime=None):
@@ -43,7 +43,7 @@ class MikrotikBridge:
                 if profile: params['profile'] = profile
                 
                 hotspot_users.set(id=existing[0]['id'], **params)
-                print(f"[MIKROTIK] Updated user {username}")
+                if config.DEBUG: print(f"[MIKROTIK] Updated user {username}")
             else:
                 # Create New
                 params = {
@@ -54,12 +54,12 @@ class MikrotikBridge:
                 if limit_uptime: params['limit-uptime'] = limit_uptime
                 
                 hotspot_users.add(**params)
-                print(f"[MIKROTIK] Created user {username}")
+                if config.DEBUG: print(f"[MIKROTIK] Created user {username}")
                 
             return True, "User authorized on Router"
             
         except Exception as e:
-            print(f"[MIKROTIK] Error adding user: {e}")
+            if config.DEBUG: print(f"[MIKROTIK] Error adding user: {e}")
             return False, str(e)
         finally:
             if self.connection: self.connection.disconnect()

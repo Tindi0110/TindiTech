@@ -283,7 +283,7 @@
     <script src="assets/js/site-api.js"></script>
     <script>
         // API_URL provided by site-api.js
-        const API_URL = window.API_URL;
+        var API_URL = window.API_URL || "http://127.0.0.1:5000";
 
         async function loadReceipt() {
             if (!API_URL) return showError("System Config Error: Missing API_URL");
@@ -306,7 +306,6 @@
 
                 renderReceipt(json.data, type);
             } catch (e) {
-                console.error(e);
                 showError("Connection Failed. Ensure server is running.");
             }
         }

@@ -38,8 +38,7 @@
 
     <script src="assets/js/site-api.js"></script>
     <script>
-        // const API_URL = "http://127.0.0.1:5000";
-        const API_URL = window.API_URL;
+        var API_URL = window.API_URL || "http://127.0.0.1:5000";
 
         async function testConnection() {
             const results = document.getElementById('results');
@@ -66,7 +65,6 @@
                     </div>`;
                 }
             } catch (err) {
-                console.error(err);
                 results.innerHTML += `<div class="status error">
                     <strong>❌ Test 1 (Standard): Failed</strong><br>
                     Error: ${err.message}
