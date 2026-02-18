@@ -7,7 +7,7 @@
 function getApiUrl() {
   const hostname = window.location.hostname;
   if (hostname !== 'localhost' && hostname !== '127.0.0.1' && hostname !== '') {
-    return 'https://api.tinditech.com'; // Production URL
+    return 'https://tinditech-backend.onrender.com'; // Production URL
   }
   return 'http://127.0.0.1:5000'; // Development URL
 }
@@ -33,20 +33,20 @@ function initSupabase() {
 
 // Lazy init
 let supabaseClient = null;
-window.getSupabase = function() {
+window.getSupabase = function () {
   if (!supabaseClient) supabaseClient = initSupabase();
   return supabaseClient;
 };
 
 // ============== GLOBAL AUTH UTILS ==============
-window.saveUserSession = function(session, role = 'customer') {
+window.saveUserSession = function (session, role = 'customer') {
   const storage = localStorage; // Default to persistent for now
   storage.setItem("sb-token", session.access_token);
   storage.setItem("user_role", role);
   storage.setItem("user_name", session.user.email);
 };
 
-window.clearUserSession = function() {
+window.clearUserSession = function () {
   localStorage.removeItem("sb-token");
   localStorage.removeItem("user_role");
   localStorage.removeItem("user_name");
