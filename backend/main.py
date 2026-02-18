@@ -15,6 +15,10 @@ from flask_mail import Mail, Message
 from pymongo import MongoClient
 import re
 import random
+
+# Supabase Utilities
+from supabase_utils import create_supabase_user, login_supabase_user, verify_token
+import supabase_db
 import jwt
 import threading
 import os
