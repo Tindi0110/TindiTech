@@ -1012,12 +1012,16 @@ footer {
         display: flex !important;
         align-items: center;
         justify-content: center;
-        font-size: 24px;
+        font-size: 20px;
+        /* Reduced slightly */
         cursor: pointer;
         color: var(--primary-color);
-        z-index: 2001;
-        /* Above navbar */
-        margin-right: 15px;
+        z-index: 9999 !important;
+        /* Force to top */
+        width: 40px;
+        height: 40px;
+        background: rgba(255, 255, 255, 0.1);
+        border-radius: 50%;
     }
 
     #navbar {
@@ -1073,42 +1077,43 @@ footer {
         margin-bottom: 10px;
     }
 
-    /* Professional 2-Column Grid for Products */
+    /* Professional 3-Column Grid for Products */
     .products-grid {
-        grid-template-columns: repeat(2, 1fr) !important;
-        gap: 12px !important;
-        padding: 20px 0 !important;
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px !important;
+        padding: 10px 0 !important;
     }
 
     .product-card {
-        border-radius: 10px !important;
+        border-radius: 8px !important;
     }
 
     .product-img-wrapper {
-        height: 140px !important;
+        height: 90px !important;
+        /* Reduced for 3 columns */
     }
 
     .product-info {
-        padding: 12px !important;
+        padding: 8px !important;
     }
 
     .product-info h3 {
-        font-size: 0.95rem !important;
-        height: 2.4em;
-        /* Limit line growth */
-        overflow: hidden;
+        font-size: 0.75rem !important;
+        height: 2.8em;
+        line-height: 1.2;
+        margin-bottom: 4px !important;
     }
 
     .product-price {
-        font-size: 1.1rem !important;
-        margin: 5px 0 !important;
+        font-size: 0.85rem !important;
+        margin: 2px 0 !important;
     }
 
     .product-card .btn {
-        padding: 8px 12px !important;
-        font-size: 0.75rem !important;
-        width: 100%;
-        border-radius: 6px !important;
+        padding: 5px 2px !important;
+        font-size: 0.65rem !important;
+        letter-spacing: 0;
+        text-transform: none;
     }
 
     /* Footer adjustments */
