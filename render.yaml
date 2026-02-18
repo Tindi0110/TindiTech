@@ -21,7 +21,7 @@ services:
       - key: SUPABASE_KEY
         sync: false
       - key: FRONTEND_URL
-        value: https://tinditech.onrender.com
+        value: https://tinditech-frontend.onrender.com
 
   # Static Frontend
   - type: static
