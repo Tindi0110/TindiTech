@@ -77,7 +77,7 @@ class Config:
     MAIL_DEFAULT_SENDER = os.getenv('MAIL_DEFAULT_SENDER', MAIL_USERNAME)
     
     # ============== FRONTEND CONFIGURATION ==============
-    FRONTEND_URL = os.getenv('FRONTEND_URL', 'http://127.0.0.1:5500')
+    FRONTEND_URL = os.getenv('FRONTEND_URL', 'https://tinditech-frontend.onrender.com')
 
 
     # ============== M-PESA CONFIGURATION ==============
