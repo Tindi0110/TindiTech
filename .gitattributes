@@ -1,0 +1,4 @@
+# Force LF line endings for shell scripts
+*.sh text eol=lf
+# Ensure other text files use CRLF on Windows but LF in repo
+* text=auto
