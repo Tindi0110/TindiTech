@@ -38,3 +38,5 @@ routeros_api==0.17.0
 
 # SSL Certificates (Fix for Windows/Mac)
 certifi
+# Supabase Auth
+gotrue==2.12.4

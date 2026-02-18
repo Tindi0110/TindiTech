@@ -14,6 +14,44 @@ function getApiUrl() {
 const API_URL = getApiUrl();
 window.API_URL = API_URL; // EXPORT GLOBAL
 
+// ============== SUPABASE CONFIGURATION ==============
+// WARNING: In production, these should be environment variables or injected.
+window.SUPABASE_URL = ""; // SET BY USER
+window.SUPABASE_KEY = ""; // SET BY USER (Anon Key)
+
+function initSupabase() {
+  if (typeof supabase === 'undefined') {
+    console.warn("Supabase library not loaded. Scripts using Supabase will fail.");
+    return null;
+  }
+  if (!window.SUPABASE_URL || !window.SUPABASE_KEY) {
+    console.warn("Supabase credentials missing. Run setup or provide them.");
+    return null;
+  }
+  return supabase.createClient(window.SUPABASE_URL, window.SUPABASE_KEY);
+}
+
+// Lazy init
+let supabaseClient = null;
+window.getSupabase = function() {
+  if (!supabaseClient) supabaseClient = initSupabase();
+  return supabaseClient;
+};
+
+// ============== GLOBAL AUTH UTILS ==============
+window.saveUserSession = function(session, role = 'customer') {
+  const storage = localStorage; // Default to persistent for now
+  storage.setItem("sb-token", session.access_token);
+  storage.setItem("user_role", role);
+  storage.setItem("user_name", session.user.email);
+};
+
+window.clearUserSession = function() {
+  localStorage.removeItem("sb-token");
+  localStorage.removeItem("user_role");
+  localStorage.removeItem("user_name");
+};
+
 // ============== GLOBAL UTILS ==============
 const COUNTRY_CODES = [
   { code: "+254", name: "Kenya" },

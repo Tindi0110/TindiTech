@@ -428,20 +428,25 @@ def logout():
 
 # --- AUTH HELPER ---
 def get_authenticated_user():
-    """Get authenticated user from Authorization header with token expiration check."""
+    """Get authenticated user from Supabase token."""
     token = request.headers.get("Authorization")
     if not token: return None
 
-    token = str(token)  # Safety
+    if token.startswith("Bearer "):
+        token = token.split(" ")[1]
 
-    user = users_col.find_one({"token": token})
-    if not user: return None
-
-    # Validate token hasn't expired
-    if not is_token_valid(user):
-        return None
-
-    return user
+    # Verify with Supabase
+    user_res = verify_token(token)
+    if not user_res: return None
+    
+    # Return a dict that mimics the expected user object
+    user = user_res.user
+    return {
+        "id": user.id,
+        "email": user.email,
+        "username": user.user_metadata.get("username", user.email),
+        "role": user.user_metadata.get("role", "customer")
+    }
 
 
 @app.route("/forgot-password", methods=["POST"])

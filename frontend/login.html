@@ -8,6 +8,7 @@
   <!-- Use Standard Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body class="auth-body">
@@ -49,59 +50,45 @@
       status.innerText = "Logging in...";
       status.style.color = "var(--accent-color)";
 
-      let data = {
-        username: document.getElementById("username").value,
-        password: document.getElementById("password").value,
-        remember: document.getElementById("remember").checked
-      };
+      const email = document.getElementById("username").value; // Assuming email is entered in username field
+      const password = document.getElementById("password").value;
+      const remember = document.getElementById("remember").checked;
+
+      const supabase = window.getSupabase();
+      if (!supabase) {
+        status.style.color = "var(--danger-color)";
+        status.innerText = "Auth Service not configured.";
+        return;
+      }
 
       try {
-        const res = await fetch(`${API}/login`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
+        const { data, error } = await supabase.auth.signInWithPassword({
+          email: email,
+          password: password,
         });
-        const result = await res.json();
 
-        if (result.success) {
-          status.style.color = "var(--success-color)";
-          status.innerText = "Login successful!";
+        if (error) throw error;
 
-          // Save Token and Role
-          const storage = document.getElementById("remember").checked ? localStorage : sessionStorage;
+        status.style.color = "var(--success-color)";
+        status.innerText = "Login successful!";
 
-          if (result.token) storage.setItem("token", result.token);
-          storage.setItem("user_role", result.user.role || 'customer');
-          storage.setItem("user_name", result.user.username);
+        // Save session
+        window.saveUserSession(data.session, data.user.user_metadata.role || 'customer');
 
-          setTimeout(() => {
-            // REDIRECT LOGIC
-            const role = result.user.role;
-            if (role === 'admin' || role === 'super_admin') {
-              window.location.href = "Admin.html";
-            } else {
-              // Check for redirect param
-              const params = new URLSearchParams(window.location.search);
-              const redirectParams = params.get('redirect');
-              window.location.href = redirectParams || "My Orders.html";
-            }
-          }, 1000);
-        } else {
-          status.style.color = "var(--danger-color)";
-          status.innerText = result.error || "Login failed";
-
-          if (result.verification_required) {
-            setTimeout(() => {
-              const emailParam = encodeURIComponent(result.email || "");
-              const phoneParam = encodeURIComponent(result.phone || "");
-              window.location.href = `verify.html?email=${emailParam}&phone=${phoneParam}`;
-            }, 1500);
+        setTimeout(() => {
+          const role = data.user.user_metadata.role || 'customer';
+          if (role === 'admin' || role === 'super_admin') {
+            window.location.href = "Admin.html";
+          } else {
+            const params = new URLSearchParams(window.location.search);
+            const redirectParams = params.get('redirect');
+            window.location.href = redirectParams || "My Orders.html";
           }
-        }
+        }, 1000);
       } catch (err) {
         console.error(err);
         status.style.color = "var(--danger-color)";
-        status.innerHTML = `Connection Failed.<br><small style='font-size:0.8em; color:#aaa;'>(Target: ${API}/login)</small>`;
+        status.innerText = err.message || "Login failed";
       }
     });
   </script>

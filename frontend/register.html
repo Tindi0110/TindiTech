@@ -8,6 +8,7 @@
   <!-- Use Standard Fonts -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="assets/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
 <body class="auth-body">
@@ -54,39 +55,58 @@
       status.innerText = "Registering...";
       status.style.color = "var(--accent-color)";
 
-      let data = {
-        fname: document.getElementById("fname").value,
-        lname: document.getElementById("lname").value,
-        email: document.getElementById("email").value,
-        phone: (document.getElementById("country_code").value + document.getElementById("phone").value).trim(),
-        username: document.getElementById("username").value,
-        password: document.getElementById("password").value,
-        admin_code: document.getElementById("admin_code").value
-      };
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const fname = document.getElementById("fname").value;
+      const lname = document.getElementById("lname").value;
+      const phone = (document.getElementById("country_code").value + document.getElementById("phone").value).trim();
+      const username = document.getElementById("username").value;
+      const admin_code = document.getElementById("admin_code").value;
+
+      const supabase = window.getSupabase();
+      if (!supabase) {
+        status.style.color = "var(--danger-color)";
+        status.innerText = "Auth Service not configured.";
+        return;
+      }
 
       try {
-        const res = await fetch(`${API}/register`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(data)
-        });
-        const result = await res.json();
+        // Handle Role Logic
+        let role = 'customer';
+        if (admin_code === 'SUPER123') role = 'super_admin';
+        else if (admin_code === 'ADMIN123') role = 'admin';
 
-        if (result.success) {
-          status.style.color = "var(--success-color)";
-          status.innerText = result.message + " Redirecting to verification...";
+        const { data, error } = await supabase.auth.signUp({
+          email: email,
+          password: password,
+          options: {
+            data: {
+              first_name: fname,
+              last_name: lname,
+              full_name: `${fname} ${lname}`,
+              phone: phone,
+              username: username,
+              role: role
+            }
+          }
+        });
+
+        if (error) throw error;
+
+        status.style.color = "var(--success-color)";
+        if (data.session) {
+          status.innerText = "Registration successful! Loading dashboard...";
+          window.saveUserSession(data.session, role);
           setTimeout(() => {
-            const emailParam = encodeURIComponent(data.email);
-            const phoneParam = encodeURIComponent(data.phone);
-            window.location.href = `verify.html?email=${emailParam}&phone=${phoneParam}`;
+            window.location.href = role.includes('admin') ? "Admin.html" : "My Orders.html";
           }, 1500);
         } else {
-          status.style.color = "var(--danger-color)";
-          status.innerText = result.error;
+          status.innerText = "Success! Please check your email for verification.";
         }
       } catch (err) {
+        console.error(err);
         status.style.color = "var(--danger-color)";
-        status.innerText = "Server connection failed.";
+        status.innerText = err.message || "Registration failed";
       }
     });
   </script>

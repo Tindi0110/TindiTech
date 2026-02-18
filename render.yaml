@@ -1,0 +1,38 @@
+services:
+  # Python Backend (Flask)
+  - type: web
+    name: tinditech-backend
+    env: python
+    buildCommand: pip install -r backend/requirements.txt
+    startCommand: gunicorn --chdir backend main:app
+    envVars:
+      - key: FLASK_ENV
+        value: production
+      - key: FLASK_SECRET_KEY
+        generateValue: true
+      - key: MONGODB_USERNAME
+        sync: false
+      - key: MONGODB_PASSWORD
+        sync: false
+      - key: MONGODB_CLUSTER
+        sync: false
+      - key: SUPABASE_URL
+        sync: false
+      - key: SUPABASE_KEY
+        sync: false
+      - key: FRONTEND_URL
+        value: https://tinditech.onrender.com
+
+  # Static Frontend
+  - type: static
+    name: tinditech-frontend
+    env: static
+    publishPath: frontend
+    headers:
+      - path: /*
+        name: Access-Control-Allow-Origin
+        value: "*"
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
