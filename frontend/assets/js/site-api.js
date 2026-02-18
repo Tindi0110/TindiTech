@@ -16,8 +16,8 @@ window.API_URL = API_URL; // EXPORT GLOBAL
 
 // ============== SUPABASE CONFIGURATION ==============
 // WARNING: In production, these should be environment variables or injected.
-window.SUPABASE_URL = ""; // SET BY USER
-window.SUPABASE_KEY = ""; // SET BY USER (Anon Key)
+window.SUPABASE_URL = "https://qhrivjgftmmedwrehvow.supabase.co"; // SET BY USER
+window.SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InFocml2amdmdG1tZWR3cmVodm93Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzE0NDEyMzUsImV4cCI6MjA4NzAxNzIzNX0.RhOSLXYZrqVl2frY5lO_eL10ItXP8JRFg_fcVDzOy-4"; // SET BY USER (Anon Key)
 
 function initSupabase() {
   if (typeof supabase === 'undefined') {
