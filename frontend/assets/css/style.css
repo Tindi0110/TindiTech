@@ -1027,9 +1027,7 @@ footer {
     #navbar {
         position: fixed;
         top: 0;
-        /* Changed to 0 so it feels full screen or consistent */
         padding-top: 80px;
-        /* Offset for header height */
         left: -100%;
         width: 85%;
         height: 100vh;
@@ -1040,8 +1038,10 @@ footer {
         padding-right: 30px;
         display: flex;
         transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.15);
-        z-index: 2000;
+        box-shadow: 10px 0 30px rgba(0, 0, 0, 0.4);
+        /* Stronger shadow */
+        z-index: 10000;
+        /* Extremely high to beat anything else */
     }
 
     #navbar.active {

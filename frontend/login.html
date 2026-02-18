@@ -18,7 +18,7 @@
       <p>Welcome back! Please login to your account.</p>
 
       <div class="input-box">
-        <input id="username" type="text" placeholder="Username" required>
+        <input id="username" type="email" placeholder="Email Address" required>
       </div>
       <div class="input-box">
         <input id="password" type="password" placeholder="Password" required>
@@ -88,7 +88,11 @@
       } catch (err) {
         console.error(err);
         status.style.color = "var(--danger-color)";
-        status.innerText = err.message || "Login failed";
+        if (err.message === "Invalid login credentials") {
+          status.innerText = "Invalid Email or Password. Please try again.";
+        } else {
+          status.innerText = err.message || "Login failed";
+        }
       }
     });
   </script>
