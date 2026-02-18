@@ -28,7 +28,7 @@ Flask-Limiter==3.5.0
 Flask-Mail==0.9.1
 
 # JWT Authentication
-PyJWT==2.8.0
+PyJWT>=2.10.1
 
 # HTTP Requests (for M-Pesa)
 requests==2.31.0
@@ -40,5 +40,3 @@ routeros_api==0.17.0
 certifi
 # Supabase Auth
 gotrue==2.12.4
-# Production Server
-gunicorn
