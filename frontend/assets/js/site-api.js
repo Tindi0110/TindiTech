@@ -52,6 +52,34 @@ window.clearUserSession = function () {
   localStorage.removeItem("user_name");
 };
 
+// ============== MOBILE MENU UTILS ==============
+window.initMobileMenu = function () {
+  const burger = document.getElementById('burgerToggle');
+  const navbar = document.getElementById('navbar');
+  if (!burger || !navbar) return;
+
+  burger.addEventListener('click', () => {
+    navbar.classList.toggle('active');
+    const icon = burger.querySelector('i');
+    if (icon) {
+      icon.className = navbar.classList.contains('active') ? 'fas fa-times' : 'fas fa-bars';
+    }
+  });
+
+  // Close when clicking links
+  navbar.querySelectorAll('a').forEach(link => {
+    link.addEventListener('click', () => {
+      navbar.classList.remove('active');
+      const icon = burger.querySelector('i');
+      if (icon) icon.className = 'fas fa-bars';
+    });
+  });
+};
+
+document.addEventListener("DOMContentLoaded", () => {
+  window.initMobileMenu();
+});
+
 // ============== GLOBAL UTILS ==============
 const COUNTRY_CODES = [
   { code: "+254", name: "Kenya" },

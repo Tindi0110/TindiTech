@@ -414,6 +414,81 @@
       color: white;
       border-color: var(--primary);
     }
+
+    /* MOBILE ADMIN STYLES */
+    @media (max-width: 768px) {
+      body {
+        flex-direction: column;
+      }
+
+      .sidebar {
+        position: fixed;
+        left: -250px;
+        top: 0;
+        bottom: 0;
+        z-index: 2000;
+        transition: 0.3s;
+      }
+
+      .sidebar.active {
+        left: 0;
+      }
+
+      .main {
+        padding: 15px;
+        margin-top: 60px;
+        width: 100%;
+      }
+
+      .admin-mobile-header {
+        display: flex !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 60px;
+        background: var(--primary);
+        color: white;
+        align-items: center;
+        padding: 0 20px;
+        z-index: 1000;
+        justify-content: space-between;
+      }
+
+      .stats-grid {
+        grid-template-columns: 1fr !important;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+
+      th,
+      td {
+        padding: 10px;
+        font-size: 13px;
+      }
+
+      .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1500;
+      }
+
+      .sidebar-overlay.active {
+        display: block;
+      }
+    }
+
+    .admin-mobile-header {
+      display: none;
+    }
   </style>
 </head>
 
@@ -567,23 +642,39 @@
       }
     }
 
-    async function performApiCall(endpoint, method, successMsg, body = null) {
-      const opts = { method: method };
-      if (body) opts.body = JSON.stringify(body);
+    // Admin Sidebar Toggle
+    document.addEventListener('DOMContentLoaded', () => {
+      const burger = document.getElementById('adminBurger');
+      const sidebar = document.querySelector('.sidebar');
+      const overlay = document.getElementById('sidebarOverlay');
 
-      const res = await fetchAuth(window.API_URL + endpoint, opts);
-      const json = await res.json();
-
-      if (json.success) {
-        if (successMsg) showToast(successMsg, 'success');
-        return json;
-      } else {
-        // If it's a GET request (like stats) we might want to return null/handle quietly instead of throwing blindly? 
-        // But for now, let's throw to keep consistency, but callers like loadStats need to catch it.
-        throw new Error(json.error || "Unknown Error");
+      function toggleSidebar() {
+        sidebar.classList.toggle('active');
+        overlay.classList.toggle('active');
       }
-    }
+
+      burger?.addEventListener('click', toggleSidebar);
+      overlay?.addEventListener('click', toggleSidebar);
+
+      // Close on nav click
+      document.querySelectorAll('.sidebar .nav-link').forEach(link => {
+        link.addEventListener('click', () => {
+          if (window.innerWidth <= 768) toggleSidebar();
+        });
+      });
+    });
   </script>
+
+  <!-- MOBILE HEADER -->
+  <div class="admin-mobile-header">
+    <div style="font-weight:700;">Admin Dashboard</div>
+    <div id="adminBurger" style="cursor:pointer; font-size:20px;">
+      <i class="fas fa-bars"></i>
+    </div>
+  </div>
+
+  <!-- Sidebar Overlay -->
+  <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
   <!-- Sidebar & Main Layout -->
   <div class="sidebar">

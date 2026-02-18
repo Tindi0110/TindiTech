@@ -10,9 +10,10 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function updateNavAuth() {
-    const token = localStorage.getItem("token") || sessionStorage.getItem("token");
-    const role = localStorage.getItem("user_role") || sessionStorage.getItem("user_role");
-    const username = localStorage.getItem("user_name") || sessionStorage.getItem("user_name");
+    // Sync with Supabase keys defined in site-api.js
+    const token = localStorage.getItem("sb-token");
+    const role = localStorage.getItem("user_role");
+    const username = localStorage.getItem("user_name");
 
     const nav = document.getElementById("navbar");
     if (!nav) return;
@@ -46,6 +47,12 @@ function updateNavAuth() {
             adminA.innerText = "Dashboard";
             adminA.style.color = "gold";
             nav.insertBefore(adminA, nav.firstChild);
+
+            // Also check footer
+            const footerAdmin = document.getElementById("footer-admin-link");
+            if (footerAdmin) {
+                footerAdmin.innerHTML = '<a href="Admin.html" style="color:gold; font-weight:bold;">Admin Panel</a>';
+            }
         }
 
     } else {
@@ -62,9 +69,8 @@ function updateNavAuth() {
 function logoutUser() {
     if (!confirm("Are you sure you want to log out?")) return;
 
-    localStorage.removeItem("token");
+    localStorage.removeItem("sb-token");
     localStorage.removeItem("user_name");
-    localStorage.removeItem("user_email");
     localStorage.removeItem("user_role");
     sessionStorage.clear();
 
