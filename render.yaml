@@ -3,7 +3,7 @@ services:
   - type: web
     name: tinditech-backend
     env: python
-    buildCommand: pip install -r backend/requirements.txt
+    buildCommand: ./build.sh
     startCommand: gunicorn --chdir backend main:app
     envVars:
       - key: FLASK_ENV
