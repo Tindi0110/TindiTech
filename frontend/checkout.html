@@ -234,9 +234,9 @@
 
     // Pre-fill user data if logged in
     document.addEventListener('DOMContentLoaded', () => {
-      const userEmail = localStorage.getItem('user_email');
-      const userName = localStorage.getItem('user_name');
-      const userPhone = localStorage.getItem('user_phone'); // If stored
+      const userEmail = localStorage.getItem('user_name'); // We store email in user_name in site-api.js
+      const userName = localStorage.getItem('full_name'); // Need to check if full_name is stored
+      const userPhone = localStorage.getItem('user_phone');
 
       if (userEmail) document.getElementById('email').value = userEmail;
       if (userName) document.getElementById('name').value = userName;
@@ -301,7 +301,7 @@
           showPopup('Creating Order', 'Connecting to server...');
           // 1. Create Order
           const headers = { 'Content-Type': 'application/json' };
-          const token = localStorage.getItem('token');
+          const token = localStorage.getItem('sb-token');
           if (token) headers['Authorization'] = token;
 
           const createRes = await fetch(`${BACKEND_URL}/create-order`, {

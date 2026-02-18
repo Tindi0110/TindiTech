@@ -40,10 +40,17 @@ window.getSupabase = function () {
 
 // ============== GLOBAL AUTH UTILS ==============
 window.saveUserSession = function (session, role = 'customer') {
-  const storage = localStorage; // Default to persistent for now
+  const storage = localStorage;
   storage.setItem("sb-token", session.access_token);
   storage.setItem("user_role", role);
   storage.setItem("user_name", session.user.email);
+
+  // Save additional metadata for checkout convenience
+  if (session.user.user_metadata) {
+    const meta = session.user.user_metadata;
+    if (meta.full_name) storage.setItem("full_name", meta.full_name);
+    if (meta.phone) storage.setItem("user_phone", meta.phone);
+  }
 };
 
 window.clearUserSession = function () {

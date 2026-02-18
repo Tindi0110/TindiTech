@@ -992,14 +992,14 @@
     const debouncedLoadUsers = debounce(() => loadUsers(1), 500);
     const debouncedLoadMessages = debounce(() => loadMessages(1), 500);
 
-    const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+    const token = localStorage.getItem('sb-token') || sessionStorage.getItem('sb-token');
     if (!token) {
       window.location.href = 'login.html';
     }
 
     async function checkSession() {
       try {
-        const res = await fetch(`${window.API_URL}/auto-login`, {
+        const res = await fetch(`${window.API_URL}/verify-session`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ token: token })
@@ -1010,15 +1010,17 @@
         const data = await res.json();
         const role = data.user.role;
         if (role !== 'admin' && role !== 'super_admin') {
-          throw new Error("Unauthorized Access: User is not an admin.");
+          sessionStorage.setItem('authError', "Unauthorized Access: User is not an admin.");
+          window.location.href = "login.html";
+          return;
         }
-        if (localStorage.getItem('token')) localStorage.setItem('user_role', role);
-        else sessionStorage.setItem('user_role', role);
+        localStorage.setItem('user_role', role);
 
         applyRBAC(role);
         document.body.style.visibility = 'visible';
       } catch (e) {
-        // Silently fail session check or handle via UI
+        console.error("Session check failed:", e);
+        window.location.href = 'login.html';
       }
     }
 

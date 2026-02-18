@@ -72,6 +72,8 @@ function logoutUser() {
     localStorage.removeItem("sb-token");
     localStorage.removeItem("user_name");
     localStorage.removeItem("user_role");
+    localStorage.removeItem("full_name");
+    localStorage.removeItem("user_phone");
     sessionStorage.clear();
 
     // Optional: Call backend logout

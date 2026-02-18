@@ -430,6 +430,30 @@ def logout():
     return jsonify({"success": True, "message": "Logged out successfully"})
 
 
+@app.route("/verify-session", methods=["POST"])
+def verify_session():
+    """Verify Supabase session and return user info."""
+    data = request.get_json() or {}
+    token = data.get("token")
+    if not token:
+        return jsonify({"success": False, "error": "No token provided"}), 401
+
+    user_res = verify_token(token)
+    if not user_res:
+        return jsonify({"success": False, "error": "Invalid or expired session"}), 401
+
+    user = user_res.user
+    return jsonify({
+        "success": True,
+        "user": {
+            "id": user.id,
+            "email": user.email,
+            "username": user.user_metadata.get("username", user.email),
+            "role": user.user_metadata.get("role", "customer")
+        }
+    })
+
+
 # --- AUTH HELPER ---
 def get_authenticated_user():
     """Get authenticated user from Supabase token."""

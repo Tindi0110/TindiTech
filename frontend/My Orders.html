@@ -63,7 +63,7 @@
     // Use global API_URL from site-api.js or fallback if missing
     var BACKEND_URL = window.API_URL || "http://127.0.0.1:5000";
     // User needs a token to identify their orders (Backend finds user by token)
-    var token = localStorage.getItem("token") || sessionStorage.getItem("token");
+    var token = localStorage.getItem("sb-token") || sessionStorage.getItem("sb-token");
 
     async function loadOrders() {
       if (!token) {
@@ -205,9 +205,8 @@
 
     async function logoutUser() {
       if (!await secureConfirm("Are you sure you want to log out?", "Logout", true)) return;
-      localStorage.removeItem("token");
+      localStorage.removeItem("sb-token");
       localStorage.removeItem("user_name");
-      localStorage.removeItem("user_email");
       localStorage.removeItem("user_role");
       sessionStorage.clear(); // Clear session as well
       window.location.href = "Home.html";

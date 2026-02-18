@@ -291,7 +291,7 @@
             const params = new URLSearchParams(window.location.search);
             const orderId = params.get('id');
             const type = params.get('type') || 'customer';
-            const token = localStorage.getItem('token') || sessionStorage.getItem('token');
+            const token = localStorage.getItem('sb-token') || sessionStorage.getItem('sb-token');
 
             if (!orderId) return showError("Invalid Link: No Order ID provided");
             if (!token) return showError("Unauthorized: Please log in to view receipt");
